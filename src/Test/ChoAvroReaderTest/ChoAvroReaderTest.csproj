@@ -10,7 +10,7 @@
   </Target>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Azure.Management.DataFactory" Version="4.26.0" />
+    <PackageReference Include="Microsoft.Azure.Management.DataFactory" Version="9.3.0" />
   </ItemGroup>
 
   <ItemGroup>
