@@ -1,5 +1,4 @@
-﻿using Apache.Arrow;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Parquet;
 using Parquet.Data;
 using Parquet.Schema;
