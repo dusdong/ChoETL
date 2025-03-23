@@ -18,7 +18,7 @@
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>ChoETL.Parquet.snk</AssemblyOriginatorKeyFile>
     <PackageIcon>cinchoo.png</PackageIcon>
-    <TargetFrameworks>net6.0;net5.0;</TargetFrameworks>
+    <TargetFramework>net9.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
