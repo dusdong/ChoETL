@@ -95,7 +95,8 @@ namespace ChoETL
             get;
             set;
         }
-        internal Dictionary<string, ChoParquetRecordFieldConfiguration> RecordFieldConfigurationsDict
+
+        public Dictionary<string, ChoParquetRecordFieldConfiguration> RecordFieldConfigurationsDict
         {
             get;
             private set;
