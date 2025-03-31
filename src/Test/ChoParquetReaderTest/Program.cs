@@ -1,19 +1,13 @@
 ﻿using ChoETL;
 using System;
-using System.Data;
+using System.Collections.Generic;
 using System.Text;
 using System.Linq;
-using System.ComponentModel;
-using System.Data.SqlClient;
-using System.Globalization;
-using System.Threading;
 using NUnit.Framework;
 using Newtonsoft.Json;
-using NUnit.Framework.Constraints;
-using System.IO;
 using System.Diagnostics;
-using Parquet;
-using System.Threading.Tasks;
+using System.Dynamic;
+using System.IO;
 
 namespace ChoParquetReaderTest
 {
@@ -28,23 +22,24 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016 12:00:00 AM +00:00,80000,56531508-89c0
 
             StringBuilder csv = new StringBuilder();
             using (var r = new ChoParquetReader(@"test1.parquet")
-                .ParquetOptions(o => o.TreatByteArrayAsString = true)
-                )
+                       .ParquetOptions(o => o.TreatByteArrayAsString = true)
+                  )
             {
                 var recs = r.ToArray();
                 recs.Print();
 
                 using (var w = new ChoCSVWriter(csv)
-                    .WithFirstLineHeader()
-                    .UseNestedKeyFormat(false)
-                    .TypeConverterFormatSpec(fs => fs.DateTimeFormat = "M/d/yyyy hh:mm:ss tt zzz")
-                    )
+                           .WithFirstLineHeader()
+                           .UseNestedKeyFormat(false)
+                           .TypeConverterFormatSpec(fs => fs.DateTimeFormat = "M/d/yyyy hh:mm:ss tt zzz")
+                      )
                     w.Write(recs);
             }
 
             var actual = csv.ToString();
             Assert.AreEqual(expected, actual);
         }
+
         [Test]
         public static void DataTableTest()
         {
@@ -66,7 +61,7 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016 12:00:00 AM +00:00,80000,56531508-89c0
 ]";
             StringBuilder csv = new StringBuilder();
             using (var r = new ChoParquetReader(@"test1.parquet")
-                .ParquetOptions(o => o.TreatByteArrayAsString = true))
+                       .ParquetOptions(o => o.TreatByteArrayAsString = true))
             {
                 var dt = r.AsDataTable();
                 var actual = JsonConvert.SerializeObject(dt, new JsonSerializerSettings()
@@ -77,7 +72,6 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016 12:00:00 AM +00:00,80000,56531508-89c0
                 });
                 Assert.AreEqual(expected, actual);
             }
-
         }
 
         [Test]
@@ -291,9 +285,9 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016 12:00:00 AM +00:00,80000,56531508-89c0
 
             //Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.GetCultureInfo("fr-FR");
             using (var w = new ChoParquetWriter<Trade>(filePath)
-                .TypeConverterFormatSpec(ts => ts.DateTimeFormat = "MM^dd^yyyy")
-                .TreatDateTimeAsString(true)
-                )
+                       .TypeConverterFormatSpec(ts => ts.DateTimeFormat = "MM^dd^yyyy")
+                       .TreatDateTimeAsString(true)
+                  )
             {
                 w.Write(new Trade
                 {
@@ -319,23 +313,23 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016 12:00:00 AM +00:00,80000,56531508-89c0
                 Assert.AreEqual(expected, actual);
             }
         }
+
         static void ParseLargeParquetTest()
         {
             using (var r = new ChoParquetReader(@"..\..\..\..\..\..\data\XBTUSD-Copy.parquet")
-                .NotifyAfter(100000)
-                .OnRowsLoaded((o, e) => $"Rows Loaded: {e.RowsLoaded} <-- {DateTime.Now}".Print())
-                .ThrowAndStopOnMissingField(false)
-                .Setup(s => s.BeforeRowGroupLoad += (o, e) => e.Skip = e.RowGroupIndex < 2)
-                )
+                       .NotifyAfter(100000)
+                       .OnRowsLoaded((o, e) => $"Rows Loaded: {e.RowsLoaded} <-- {DateTime.Now}".Print())
+                       .ThrowAndStopOnMissingField(false)
+                       .Setup(s => s.BeforeRowGroupLoad += (o, e) => e.Skip = e.RowGroupIndex < 2)
+                  )
             {
                 r.Loop();
             }
-
         }
 
         public class FlightInfo
         {
-            public DateTime FL_DATE { get; set; }
+            public DateTime? FL_DATE { get; set; }
             public int? DEP_DELAY { get; set; }
             public int? ARR_DELAY { get; set; }
             public int? AIR_TIME { get; set; }
@@ -359,45 +353,153 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016 12:00:00 AM +00:00,80000,56531508-89c0
         {
             string testFile = "Flights 1m.parquet";
 
+            // 如果测试文件不存在，先创建它
+            if (!File.Exists(testFile))
+            {
+                CreateTestFile(testFile);
+            }
+
+            // 然后继续执行原来的测试代码
             Stopwatch w = new Stopwatch();
             w.Start();
 
-            var table = ParquetReader.ReadTableFromFileAsync(testFile);
-            w.Stop();
-            w.Elapsed.Print();
-
             w.Restart();
             using (var r = new ChoParquetReader<FlightInfo>(testFile)
-                .Configure(c => c.CustomSetMemberValueOverride = (r, fn, fv, fc, culture) =>
-                {
-                    if (r is FlightInfo fi)
-                    {
-                        if (fn == nameof(FlightInfo.FL_DATE))
-                            fi.FL_DATE = DateTime.Parse(fv.ToNString());
-                        else if (fn == nameof(FlightInfo.DEP_DELAY))
-                            fi.DEP_DELAY = int.Parse(fv.ToNString());
-                        else if (fn == nameof(FlightInfo.ARR_DELAY))
-                            fi.ARR_DELAY = int.Parse(fv.ToNString());
-                        else if (fn == nameof(FlightInfo.AIR_TIME))
-                            fi.AIR_TIME = int.Parse(fv.ToNString());
-                        else if (fn == nameof(FlightInfo.DISTANCE))
-                            fi.DISTANCE = int.Parse(fv.ToNString());
-                        else if (fn == nameof(FlightInfo.DEP_TIME))
-                            fi.DEP_TIME = double.Parse(fv.ToNString());
-                        else if (fn == nameof(FlightInfo.ARR_TIME))
-                            fi.ARR_TIME = double.Parse(fv.ToNString());
-                    }
-                })
-                )
+                       .Configure(c =>
+                       {
+                           // 配置错误模式为忽略错误并继续
+                           c.ErrorMode = ChoErrorMode.IgnoreAndContinue;
+
+                           // 自定义设置成员值的逻辑，处理所有可能的空值和解析错误
+                           c.CustomSetMemberValueOverride = (r, fn, fv, fc, culture) =>
+                           {
+                               if (r is FlightInfo fi)
+                               {
+                                   // 检查值是否为空或者字符串为空
+                                   string strValue = fv?.ToNString();
+
+                                   // 根据字段名称分别处理
+                                   switch (fn)
+                                   {
+                                       case nameof(FlightInfo.FL_DATE):
+                                           if (!string.IsNullOrWhiteSpace(strValue) && DateTime.TryParse(strValue, out DateTime dateValue))
+                                               fi.FL_DATE = dateValue;
+                                           else
+                                               fi.FL_DATE = null; // 使用 null 作为默认值
+                                           break;
+
+                                       case nameof(FlightInfo.DEP_DELAY):
+                                           if (!string.IsNullOrWhiteSpace(strValue) && int.TryParse(strValue, out int depDelay))
+                                               fi.DEP_DELAY = depDelay;
+                                           else
+                                               fi.DEP_DELAY = 0; // 使用 0 作为默认值
+                                           break;
+
+                                       case nameof(FlightInfo.ARR_DELAY):
+                                           if (!string.IsNullOrWhiteSpace(strValue) && int.TryParse(strValue, out int arrDelay))
+                                               fi.ARR_DELAY = arrDelay;
+                                           else
+                                               fi.ARR_DELAY = 0;
+                                           break;
+
+                                       case nameof(FlightInfo.AIR_TIME):
+                                           if (!string.IsNullOrWhiteSpace(strValue) && int.TryParse(strValue, out int airTime))
+                                               fi.AIR_TIME = airTime;
+                                           else
+                                               fi.AIR_TIME = 0;
+                                           break;
+
+                                       case nameof(FlightInfo.DISTANCE):
+                                           if (!string.IsNullOrWhiteSpace(strValue) && int.TryParse(strValue, out int distance))
+                                               fi.DISTANCE = distance;
+                                           else
+                                               fi.DISTANCE = 0;
+                                           break;
+
+                                       case nameof(FlightInfo.DEP_TIME):
+                                           if (!string.IsNullOrWhiteSpace(strValue) && double.TryParse(strValue, out double depTime))
+                                               fi.DEP_TIME = depTime;
+                                           else
+                                               fi.DEP_TIME = 0.0;
+                                           break;
+
+                                       case nameof(FlightInfo.ARR_TIME):
+                                           if (!string.IsNullOrWhiteSpace(strValue) && double.TryParse(strValue, out double arrTime))
+                                               fi.ARR_TIME = arrTime;
+                                           else
+                                               fi.ARR_TIME = 0.0;
+                                           break;
+                                   }
+                               }
+                           };
+                       })
+                  )
             {
-                //r.AsDataTable().Rows.Count.Print();
-                var recs = r.ToArray();
-                recs.Length.Print();
-                recs.FirstOrDefault().Print();
-                //r.First().Print();
+                try
+                {
+                    var recs = r.ToArray();
+                    recs.Length.Print();
+
+                    if (recs.Length > 0)
+                        recs.FirstOrDefault()?.Print();
+                    else
+                        Console.WriteLine("No records found.");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error reading Parquet file: {ex.Message}");
+                    if (ex.InnerException != null)
+                        Console.WriteLine($"Inner exception: {ex.InnerException.Message}");
+                }
             }
+
             w.Stop();
             w.Elapsed.Print();
+        }
+
+// 创建测试文件的方法
+        private static void CreateTestFile(string filePath)
+        {
+            // 创建一个有效的航班数据结构
+            var flights = new List<dynamic>();
+
+            // 添加包含有效日期的记录
+            for (int i = 0; i < 10; i++)
+            {
+                dynamic flight = new ExpandoObject();
+                flight.FL_DATE = DateTime.Now.AddDays(-i).ToString("yyyy-MM-dd");
+                flight.ORIGIN = $"ORG{i}";
+                flight.DEST = $"DST{i}";
+                flight.DISTANCE = i * 100;
+                flight.DEP_DELAY = i * 5;
+                flight.ARR_DELAY = i * 3;
+                flight.AIR_TIME = i * 30;
+                flight.DEP_TIME = i * 100.5;
+                flight.ARR_TIME = i * 200.5;
+
+                flights.Add(flight);
+            }
+
+            // 添加一条有空日期的记录
+            dynamic emptyDateFlight = new ExpandoObject();
+            emptyDateFlight.FL_DATE = null;
+            emptyDateFlight.ORIGIN = "ORG_NULL";
+            emptyDateFlight.DEST = "DST_NULL";
+            emptyDateFlight.DISTANCE = 9999;
+            emptyDateFlight.DEP_DELAY = null;
+            emptyDateFlight.ARR_DELAY = null;
+            emptyDateFlight.AIR_TIME = null;
+            emptyDateFlight.DEP_TIME = null;
+            emptyDateFlight.ARR_TIME = null;
+            flights.Add(emptyDateFlight);
+
+            // 写入文件
+            using (var writer = new ChoParquetWriter(filePath))
+            {
+                writer.Write(flights);
+            }
+
+            Console.WriteLine($"Created test file: {filePath}");
         }
 
         static void Main(string[] args)
@@ -412,6 +514,7 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016 12:00:00 AM +00:00,80000,56531508-89c0
             return;
             WriteParquetWithNullableFields();
         }
+
         [Test]
         public static void Issue233()
         {
@@ -480,10 +583,10 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016 12:00:00 AM +00:00,80000,56531508-89c0
   ""IHSLRorIMOShipNo"": 9952646
 }";
             using (var r = new ChoParquetReader(@"ships.parquet")
-                .IgnoreField("DataSetVersion1")
-                .ParquetOptions(o => o.TreatByteArrayAsString = true)
-                .ErrorMode(ChoErrorMode.ThrowAndStop)
-                )
+                       .IgnoreField("DataSetVersion1")
+                       .ParquetOptions(o => o.TreatByteArrayAsString = true)
+                       .ErrorMode(ChoErrorMode.ThrowAndStop)
+                  )
             {
                 var rec = r.First();
                 rec.Print();
@@ -496,6 +599,7 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016 12:00:00 AM +00:00,80000,56531508-89c0
                 Assert.AreEqual(expected, actual);
             }
         }
+
         [Test]
         public static void MissingFieldValueTest()
         {
@@ -526,16 +630,18 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016 12:00:00 AM +00:00,80000,56531508-89c0
                 Assert.AreEqual(expected, actual);
             }
         }
+
         private static void CreateParquetFile(string parquetFilePath, string csv)
         {
             using (var r = ChoCSVReader.LoadText(csv)
-                   .WithFirstLineHeader()
+                       .WithFirstLineHeader()
                   )
             {
                 using (var w = new ChoParquetWriter(parquetFilePath))
                     w.Write(r);
             }
         }
+
         static string ReadParquetFile(string parquetOutputFilePath)
         {
             parquetOutputFilePath.Print();

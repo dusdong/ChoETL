@@ -9,7 +9,7 @@ using System.IO;
 using Newtonsoft.Json;
 using NUnit.Framework;
 using System.Globalization;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using System.Data;
 using System.Diagnostics;
 using System.Threading.Tasks;
@@ -25,11 +25,14 @@ namespace ChoParquetWriterTest
         {
             [System.ComponentModel.Description("Full Time Employee")]
             Permanent = 0,
+
             [System.ComponentModel.Description("Temporary Employee")]
             Temporary = 1,
+
             [System.ComponentModel.Description("Contract Employee")]
             Contract = 2
         }
+
         [Test]
         public static void QuickTest()
         {
@@ -50,10 +53,10 @@ namespace ChoParquetWriterTest
   }
 ]";
             using (var r = ChoCSVReader.LoadText(csv)
-                .WithFirstLineHeader()
-                .WithMaxScanRows(2)
-                .QuoteAllFields()
-                )
+                       .WithFirstLineHeader()
+                       .WithMaxScanRows(2)
+                       .QuoteAllFields()
+                  )
             {
                 using (var w = new ChoParquetWriter(filePath))
                 {
@@ -64,6 +67,7 @@ namespace ChoParquetWriterTest
             var actual = ReadParquetFileAsJSON(filePath);
             Assert.AreEqual(expected, actual);
         }
+
         [Test]
         public static void Test1()
         {
@@ -92,16 +96,16 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
 
             //ChoTypeConverterFormatSpec.Instance.TreatCurrencyAsDecimal = false;
             using (var r = ChoCSVReader.LoadText(csv)
-                .WithFirstLineHeader()
-                .WithMaxScanRows(2)
-                .QuoteAllFields()
-                .TypeConverterFormatSpec(ts => ts.TreatCurrencyAsDecimal = false)
-                )
+                       .WithFirstLineHeader()
+                       .WithMaxScanRows(2)
+                       .QuoteAllFields()
+                       .TypeConverterFormatSpec(ts => ts.TreatCurrencyAsDecimal = false)
+                  )
             {
                 var recs = r.ToArray();
                 using (var w = new ChoParquetWriter(filePath)
-                    //.Configure(c => c.TreatDateTimeAsDateTimeOffset = false)
-                    )
+                       //.Configure(c => c.TreatDateTimeAsDateTimeOffset = false)
+                      )
                 {
                     w.Write(recs);
                 }
@@ -114,11 +118,16 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
             });
             Assert.AreEqual(expected, actual);
         }
-        public enum SalesGroupEnum { None, First, Second };
+
+        public enum SalesGroupEnum
+        {
+            None,
+            First,
+            Second
+        };
 
         public class SalesItem
         {
-
             public Guid? salesItemId { get; set; }
 
             public Guid? tenantId { get; set; }
@@ -172,7 +181,6 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
         {
             public int salesId { get; set; }
             public string salesName { get; set; }
-
         }
 
         [Test]
@@ -255,17 +263,17 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
             string filePath = "Issue295.parquet";
             //ConvertJson2Parquet<SalesItem>(json, filePath);
             using (var r = ChoJSONReader<SalesItem>.LoadText(json)
-                .JsonSerializationSettings(js => js.DateParseHandling = DateParseHandling.None)
-                )
+                       .JsonSerializationSettings(js => js.DateParseHandling = DateParseHandling.None)
+                  )
             {
                 var recs = r.ToArray();
                 recs.Print();
 
                 using (var w = new ChoParquetWriter(filePath)
-                    .Configure(c => c.TreatDateTimeAsString = true)
-                    .TypeConverterFormatSpec(ts => ts.DateTimeOffsetFormat = "yyyy-MM-ddThh:mm:ss.fzzz")
-                    .Configure(c => c.ArrayValueNamePrefix = String.Empty)
-                    )
+                           .Configure(c => c.TreatDateTimeAsString = true)
+                           .TypeConverterFormatSpec(ts => ts.DateTimeOffsetFormat = "yyyy-MM-ddThh:mm:ss.fzzz")
+                           .Configure(c => c.ArrayValueNamePrefix = String.Empty)
+                      )
                 {
                     foreach (var rec in recs)
                         w.Write(rec);
@@ -284,18 +292,18 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
         private static void ConvertJson2Parquet<T>(string json, string parquetFilePath)
         {
             using (var r = ChoJSONReader<T>.LoadText(json)
-                .JsonSerializationSettings(js => js.DateParseHandling = DateParseHandling.DateTimeOffset)
-                )
+                       .JsonSerializationSettings(js => js.DateParseHandling = DateParseHandling.DateTimeOffset)
+                  )
             {
                 var recs = r.ToArray();
 
                 recs.Print();
 
                 using (var w = new ChoParquetWriter(parquetFilePath)
-                    .Configure(c => c.TreatDateTimeAsString = true)
-                    .TypeConverterFormatSpec(ts => ts.DateTimeOffsetFormat = "yyyy-MM-ddThh:mm:ss.fzzz")
-                    .Configure(c => c.ArrayValueNamePrefix = String.Empty)
-                    )
+                           .Configure(c => c.TreatDateTimeAsString = true)
+                           .TypeConverterFormatSpec(ts => ts.DateTimeOffsetFormat = "yyyy-MM-ddThh:mm:ss.fzzz")
+                           .Configure(c => c.ArrayValueNamePrefix = String.Empty)
+                      )
                 {
                     foreach (var rec in recs)
                         w.Write(rec);
@@ -331,16 +339,16 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
 
             //ChoTypeConverterFormatSpec.Instance.TreatCurrencyAsDecimal = false;
             using (var r = ChoCSVReader.LoadText(csv)
-                .WithFirstLineHeader()
-                .WithMaxScanRows(2)
-                .QuoteAllFields()
-                .TypeConverterFormatSpec(ts => ts.TreatCurrencyAsDecimal = false)
-                )
+                       .WithFirstLineHeader()
+                       .WithMaxScanRows(2)
+                       .QuoteAllFields()
+                       .TypeConverterFormatSpec(ts => ts.TreatCurrencyAsDecimal = false)
+                  )
             {
                 var recs = r.ToArray();
                 using (var w = new ChoParquetWriter(filePath)
-                    //.Configure(c => c.TreatDateTimeAsDateTimeOffset = true)
-                    )
+                       //.Configure(c => c.TreatDateTimeAsDateTimeOffset = true)
+                      )
                 {
                     w.Write(recs);
                 }
@@ -354,6 +362,7 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
             });
             Assert.AreEqual(expected, actual);
         }
+
         [Test]
         public static void EnumTest()
         {
@@ -369,11 +378,11 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
             //ChoTypeConverterFormatSpec.Instance.EnumFormat = ChoEnumFormatSpec.Description;
 
             using (var w = new ChoParquetWriter(filePath)
-                .WithField("Id")
-                .WithField("Name")
-                .WithField("EmpType")
-                .TypeConverterFormatSpec(ts => ts.EnumFormat = ChoEnumFormatSpec.Description)
-                )
+                       .WithField("Id")
+                       .WithField("Name")
+                       .WithField("EmpType")
+                       .TypeConverterFormatSpec(ts => ts.EnumFormat = ChoEnumFormatSpec.Description)
+                  )
             {
                 w.Write(new
                 {
@@ -384,17 +393,18 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
             }
 
             using (var r = new ChoParquetReader(filePath)
-                .WithField("Id")
-                .WithField("Name")
-                .WithField("EmpType", fieldType: typeof(EmployeeType))
-                .TypeConverterFormatSpec(ts => ts.EnumFormat = ChoEnumFormatSpec.Description)
-                )
+                       .WithField("Id")
+                       .WithField("Name")
+                       .WithField("EmpType", fieldType: typeof(EmployeeType))
+                       .TypeConverterFormatSpec(ts => ts.EnumFormat = ChoEnumFormatSpec.Description)
+                  )
             {
                 var recs = r.ToArray();
                 var actual = JsonConvert.SerializeObject(recs, Formatting.Indented);
                 Assert.AreEqual(expected, actual);
             }
         }
+
         [Test]
         public static void CSVArrayToParquet()
         {
@@ -403,16 +413,16 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
 1,Tom,Dick,Harry";
 
             using (var r = ChoCSVReader.LoadText(csv).WithFirstLineHeader()
-                .Configure(c => c.AutoArrayDiscovery = true)
-                .Configure(c => c.ArrayIndexSeparator = '/')
-                )
+                       .Configure(c => c.AutoArrayDiscovery = true)
+                       .Configure(c => c.ArrayIndexSeparator = '/')
+                  )
             {
                 using (var w = new ChoParquetWriter(filePath)
-                    .Configure(c => c.UseNestedKeyFormat = false)
-                    .WithField("id")
-                    .WithField("name")
-                    .WithField("friends", fieldType: typeof(byte[]), valueConverter: o => o.Serialize())
-                    )
+                           .Configure(c => c.UseNestedKeyFormat = false)
+                           .WithField("id")
+                           .WithField("name")
+                           .WithField("friends", fieldType: typeof(byte[]), valueConverter: o => o.Serialize())
+                      )
                 {
                     w.Write(r);
                 }
@@ -429,11 +439,11 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
   }
 ]";
             using (var r = new ChoParquetReader(filePath)
-                .WithField("id")
-                .WithField("name")
-                .WithField("friends", fieldType: typeof(byte[]), valueConverter: o => ((byte[])o).Deserialize<object[]>())
-                .TypeConverterFormatSpec(ts => ts.EnumFormat = ChoEnumFormatSpec.Description)
-                )
+                       .WithField("id")
+                       .WithField("name")
+                       .WithField("friends", fieldType: typeof(byte[]), valueConverter: o => ((byte[])o).Deserialize<object[]>())
+                       .TypeConverterFormatSpec(ts => ts.EnumFormat = ChoEnumFormatSpec.Description)
+                  )
             {
                 var recs = r.ToArray();
                 var actual = JsonConvert.SerializeObject(recs, Formatting.Indented);
@@ -445,19 +455,25 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
         {
             [ChoJSONRecordField(FieldName = "id")]
             public int? Id { get; set; }
+
             [ChoJSONRecordField]
             public string Name { get; set; }
+
             [ChoIgnoreMember] //Ignore Uuid
             public string Uuid { get; set; }
+
             [ChoJSONRecordField]
             public string CreatedAt { get; set; }
+
             [ChoJSONRecordField]
             public string UpdatedAt { get; set; }
+
             [ChoJSONRecordField]
             public bool Active { get; set; }
 
             public Point Location { get; set; }
         }
+
         [Test]
         public static void JSON2Parquet1()
         {
@@ -485,16 +501,16 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
 }
 ";
             using (var r = ChoJSONReader.LoadText(json)
-                .WithJSONPath("$..facilities[*]", true)
-                .WithField("id")
-                .WithField("createdAt", fieldType: typeof(DateTimeOffset), valueConverter: o => new DateTimeOffset((DateTime)o))
-                .ErrorMode(ChoErrorMode.IgnoreAndContinue)
-                )
+                       .WithJSONPath("$..facilities[*]", true)
+                       .WithField("id")
+                       .WithField("createdAt", fieldType: typeof(DateTimeOffset), valueConverter: o => new DateTimeOffset((DateTime)o))
+                       .ErrorMode(ChoErrorMode.IgnoreAndContinue)
+                  )
             {
                 using (var w = new ChoParquetWriter(filePath)
-                    .Configure(c => c.TreatDateTimeOffsetAsString = true)
-                    .ErrorMode(ChoErrorMode.IgnoreAndContinue)
-                    )
+                           .Configure(c => c.TreatDateTimeOffsetAsString = true)
+                           .ErrorMode(ChoErrorMode.IgnoreAndContinue)
+                      )
                 {
                     w.Write(r);
                 }
@@ -511,10 +527,10 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
   }
 ]";
             using (var r = new ChoParquetReader(filePath)
-                .WithField("id")
-                .WithField("createdAt", fieldType: typeof(DateTimeOffset))
-                .TypeConverterFormatSpec(ts => ts.EnumFormat = ChoEnumFormatSpec.Description)
-                )
+                       .WithField("id")
+                       .WithField("createdAt", fieldType: typeof(DateTimeOffset))
+                       .TypeConverterFormatSpec(ts => ts.EnumFormat = ChoEnumFormatSpec.Description)
+                  )
             {
                 var recs = r.ToArray();
                 var actual = JsonConvert.SerializeObject(recs, Formatting.Indented);
@@ -558,6 +574,7 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
                 w.Write(new int[] { 1, 2 });
                 w.Write(new int[] { 3, 4 });
             }
+
             string expected = @"[
   {
     ""Value"": 1
@@ -576,6 +593,7 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
             var actual = ReadParquetFileAsJSON(filePath);
             Assert.AreEqual(expected, actual);
         }
+
         [Test]
         public static void SerializeDictionary()
         {
@@ -587,8 +605,8 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
                     [1] = "Tom",
                     [2] = "Mark"
                 });
-
             }
+
             string expected = @"[
   {
     ""Key"": 1,
@@ -603,21 +621,22 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
             var actual = ReadParquetFileAsJSON(filePath);
             Assert.AreEqual(expected, actual);
         }
+
         [Test]
         public static void ByteArrayTest()
         {
             string filePath = "ByteArrayTest.parquet";
             using (var w = new ChoParquetWriter("ByteArrayTest.parquet")
-                .UseNestedKeyFormat(false)
-                )
+                       .UseNestedKeyFormat(false)
+                  )
             {
                 w.Write(new Dictionary<int, byte[]>()
                 {
                     [1] = Encoding.Default.GetBytes("Tom"),
                     [2] = Encoding.Default.GetBytes("Mark")
                 });
-
             }
+
             string expected = @"[
   {
     ""Key"": 1,
@@ -638,15 +657,15 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
         {
             string filePath = "DateTimeTest.parquet";
             IList<DateTime> dateList = new List<DateTime>
-{
-    new DateTime(2009, 12, 7), //, 23, 10, 0, DateTimeKind.Utc),
-    new DateTime(2010, 1, 1, 9, 0, 0, DateTimeKind.Utc),
-    new DateTime(2010, 2, 10, 10, 0, 0, DateTimeKind.Utc)
-};
+            {
+                new DateTime(2009, 12, 7), //, 23, 10, 0, DateTimeKind.Utc),
+                new DateTime(2010, 1, 1, 9, 0, 0, DateTimeKind.Utc),
+                new DateTime(2010, 2, 10, 10, 0, 0, DateTimeKind.Utc)
+            };
 
             using (var w = new ChoParquetWriter<DateTime>(filePath)
-               .TypeConverterFormatSpec(ts => ts.DateTimeFormat = "o")
-                )
+                       .TypeConverterFormatSpec(ts => ts.DateTimeFormat = "o")
+                  )
                 w.Write(dateList);
 
             string expected = @"[
@@ -662,7 +681,7 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
 ]";
 
             using (var r = new ChoParquetReader(filePath)
-                )
+                  )
             {
                 var recs = r.ToArray();
                 var actual = ReadParquetFileAsJSON(filePath);
@@ -714,27 +733,32 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
                 Assert.AreEqual(expected, actual);
             }
         }
+
         public class MyData
         {
             public Health Health { get; set; }
             public Safety Safety { get; set; }
             public List<Climate> Climate { get; set; }
         }
+
         public class Health
         {
             public int Id { get; set; }
             public bool Status { get; set; }
         }
+
         public class Safety
         {
             public int Id { get; set; }
             public bool Status { get; set; }
         }
+
         public class Climate
         {
             public int Id { get; set; }
             public bool Status { get; set; }
         }
+
         [Test]
         public static void Json2Parquet()
         {
@@ -756,12 +780,12 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
 }]";
 
             using (var r = ChoJSONReader<MyData>.LoadText(json)
-                .UseJsonSerialization())
+                       .UseJsonSerialization())
             {
                 using (var w = new ChoParquetWriter(filePath)
-                    .UseNestedKeyFormat()
-                    .Configure(c => c.ArrayValueNamePrefix = String.Empty)
-                    )
+                           .UseNestedKeyFormat()
+                           .Configure(c => c.ArrayValueNamePrefix = String.Empty)
+                      )
                 {
                     var recs = r.ToArray();
                     //var dict = recs.Select(r1 => r1.FlattenToDictionary()).ToArray(); //.Select(rec1 => rec1.ToDictionary().Flatten().ToDictionary());
@@ -796,14 +820,15 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
   }
 ]";
             using (var r = new ChoParquetReader<MyData>(filePath)
-                    .UseNestedKeyFormat()
-                )
+                       .UseNestedKeyFormat()
+                  )
             {
                 var recs = r.ToArray();
                 var actual = JsonConvert.SerializeObject(recs, Formatting.Indented);
                 Assert.AreEqual(expected, actual);
             }
         }
+
         [Test]
         public static void Json2ParquetWithArrayOfInts()
         {
@@ -829,10 +854,10 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
 }]";
 
             using (var r = ChoJSONReader.LoadText(json)
-                .UseJsonSerialization())
+                       .UseJsonSerialization())
             {
                 using (var w = new ChoParquetWriter(filePath)
-                    )
+                      )
                 {
                     var recs = r.ToArray();
                     //var dict = recs.Select(r1 => r1.FlattenToDictionary()).ToArray(); //.Select(rec1 => rec1.ToDictionary().Flatten().ToDictionary());
@@ -866,44 +891,45 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
   }
 ]";
             using (var r = new ChoParquetReader(filePath)
-                )
+                  )
             {
                 var recs = r.ToArray();
                 var actual = JsonConvert.SerializeObject(recs, Formatting.Indented);
                 Assert.AreEqual(expected, actual);
             }
         }
+
         [Test]
         public static void JsonToParquet52()
         {
             string filePath = "JsonToParquet52.parquet";
 
             using (var r = new ChoJSONReader("sample52.json")
-                .WithJSONPath("$..data")
-                .UseJsonSerialization()
-                .JsonSerializationSettings(s => s.DateParseHandling = DateParseHandling.None)
-                .JsonSerializationSettings(s => s.NullValueHandling = NullValueHandling.Include)
-                )
+                       .WithJSONPath("$..data")
+                       .UseJsonSerialization()
+                       .JsonSerializationSettings(s => s.DateParseHandling = DateParseHandling.None)
+                       .JsonSerializationSettings(s => s.NullValueHandling = NullValueHandling.Include)
+                  )
             {
                 using (var w = new ChoParquetWriter(filePath)
-                    .ThrowAndStopOnMissingField(false)
-                    )
+                           .ThrowAndStopOnMissingField(false)
+                      )
                     w.Write(r);
             }
 
             string expected = null;
             using (var r = new ChoParquetReader(filePath)
-                .Setup(s => s.MembersDiscovered += (o, e) =>
-                {
-                    var args = e as ChoEventArgs<IDictionary<string, Type>>;
-                    if (args.Value.ContainsKey("Number_of_Users"))
-                        args.Value["Number_of_Users"] = typeof(long);
+                       .Setup(s => s.MembersDiscovered += (o, e) =>
+                       {
+                           var args = e as ChoEventArgs<IDictionary<string, Type>>;
+                           if (args.Value.ContainsKey("Number_of_Users"))
+                               args.Value["Number_of_Users"] = typeof(long);
 
-                    if (args.Value.ContainsKey("MRR"))
-                        args.Value["MRR"] = typeof(long?);
-                })
-                .TypeConverterFormatSpec(ts => ts.DateTimeFormat = "o")
-                )
+                           if (args.Value.ContainsKey("MRR"))
+                               args.Value["MRR"] = typeof(long?);
+                       })
+                       .TypeConverterFormatSpec(ts => ts.DateTimeFormat = "o")
+                  )
             {
                 var recs = r.ToArray().Select(r =>
                 {
@@ -921,6 +947,7 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
                         if (r[key] is int && (int)r[key] == 0)
                             r[key] = null;
                     }
+
                     return r;
                 });
                 var actual = JsonConvert.SerializeObject(recs, Formatting.Indented);
@@ -928,6 +955,7 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
                 Assert.Ignore();
             }
         }
+
         [Test]
         public static void DataTableTest()
         {
@@ -947,14 +975,14 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
   }
 ]";
             using (var r = ChoCSVReader.LoadText(csv)
-                .WithFirstLineHeader()
-                )
+                       .WithFirstLineHeader()
+                  )
             {
                 var dt = r.AsDataTable("Emp");
 
                 using (var w = new ChoParquetWriter(filePath)
-                    .Configure(c => c.CompressionMethod = Parquet.CompressionMethod.Gzip)
-                    )
+                           .Configure(c => c.CompressionMethod = Parquet.CompressionMethod.Gzip)
+                      )
                 {
                     w.Write(dt);
                     w.Close();
@@ -963,6 +991,7 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
                     s.Print();
                 }
             }
+
             var actual = ReadParquetFileAsJSON(filePath);
             Assert.AreEqual(expected, actual);
         }
@@ -984,8 +1013,8 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
                             Prop01 = "Prop01",
                             Properties = new Properties
                             {
-                                 Prop10 = 1,
-                                 Prop11 = 2,
+                                Prop10 = 1,
+                                Prop11 = 2,
                             }
                         },
                         new Data
@@ -994,8 +1023,8 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
                             Prop01 = "Prop01",
                             Properties = new Properties
                             {
-                                 Prop10 = 1,
-                                 Prop11 = 2,
+                                Prop10 = 1,
+                                Prop11 = 2,
                             }
                         },
                         new Data
@@ -1004,8 +1033,8 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
                             Prop01 = "Prop01",
                             Properties = new Properties
                             {
-                                 Prop10 = 1,
-                                 Prop11 = 2,
+                                Prop10 = 1,
+                                Prop11 = 2,
                             }
                         },
                     },
@@ -1017,8 +1046,8 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
                             Prop01 = "Prop01",
                             Properties = new Properties
                             {
-                                 Prop10 = 1,
-                                 Prop11 = 2,
+                                Prop10 = 1,
+                                Prop11 = 2,
                             }
                         },
                         new Data
@@ -1027,8 +1056,8 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
                             Prop01 = "Prop01",
                             Properties = new Properties
                             {
-                                 Prop10 = 1,
-                                 Prop11 = 2,
+                                Prop10 = 1,
+                                Prop11 = 2,
                             }
                         },
                         new Data
@@ -1037,8 +1066,8 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
                             Prop01 = "Prop01",
                             Properties = new Properties
                             {
-                                 Prop10 = 1,
-                                 Prop11 = 2,
+                                Prop10 = 1,
+                                Prop11 = 2,
                             }
                         },
                     },
@@ -1050,8 +1079,8 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
                             Prop01 = "Prop01",
                             Properties = new Properties
                             {
-                                 Prop10 = 1,
-                                 Prop11 = 2,
+                                Prop10 = 1,
+                                Prop11 = 2,
                             }
                         },
                         new Data
@@ -1060,8 +1089,8 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
                             Prop01 = "Prop01",
                             Properties = new Properties
                             {
-                                 Prop10 = 1,
-                                 Prop11 = 2,
+                                Prop10 = 1,
+                                Prop11 = 2,
                             }
                         },
                         new Data
@@ -1070,8 +1099,8 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
                             Prop01 = "Prop01",
                             Properties = new Properties
                             {
-                                 Prop10 = 1,
-                                 Prop11 = 2,
+                                Prop10 = 1,
+                                Prop11 = 2,
                             }
                         },
                     },
@@ -1085,13 +1114,12 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
                             Prop11 = 2,
                         }
                     },
-
                 }
             };
 
             StringBuilder json = new StringBuilder();
             using (var w = new ChoJSONWriter<CompleteFile>(json)
-                )
+                  )
             {
                 w.Write(completeFile);
             }
@@ -1146,11 +1174,11 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
   }
 ]";
             using (var r = ChoJSONReader<CompleteFile>.LoadText(json.ToString())
-                .UseJsonSerialization()
-                )
+                       .UseJsonSerialization()
+                  )
             {
                 using (var w = new ChoParquetWriter(filePath)
-                    )
+                      )
                 {
                     w.Write(r.Select(rec1 => rec1.FlattenToDictionary()));
                 }
@@ -1165,13 +1193,14 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
 
             var actual = ReadParquetFileAsJSON(filePath);
             Assert.AreEqual(expected, actual);
-
         }
 
         public class CompleteFile
         {
             public string DataSource { get; set; }
+
             public long? DataType { get; set; }
+
             //public GeneralData GeneralData { get; set; }
             public Samples Samples { get; set; }
         }
@@ -1188,6 +1217,7 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
         {
             public long? Prop00 { get; set; }
             public string Prop01 { get; set; }
+
             public Properties Properties { get; set; }
             //public MyImage Image { get; set; }
         }
@@ -1197,6 +1227,7 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
             [JsonProperty("prop10_x")]
             [DisplayName("prop10_x")]
             public long? Prop10 { get; set; }
+
             public long? Prop11 { get; set; }
         }
 
@@ -1206,13 +1237,13 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
             string filePath = "Issue202.parquet";
 
             using (var r = new ChoJSONReader("Issue202.json")
-                //.UseJsonSerialization()
-                )
+                   //.UseJsonSerialization()
+                  )
             {
                 using (var w = new ChoParquetWriter(filePath)
-                    .WithMaxScanRows(3)
-                    .ThrowAndStopOnMissingField(false)
-                    )
+                           .WithMaxScanRows(3)
+                           .ThrowAndStopOnMissingField(false)
+                      )
                 {
                     var recs = r.ToArray();
                     w.Write(recs);
@@ -1238,13 +1269,13 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
         {
             string filePath = "Sample230.parquet";
             using (var r = new ChoJSONReader("Sample230.json")
-                .UseJsonSerialization()
-                .JsonSerializationSettings(s => s.DateParseHandling = DateParseHandling.None)
-                )
+                       .UseJsonSerialization()
+                       .JsonSerializationSettings(s => s.DateParseHandling = DateParseHandling.None)
+                  )
             {
                 using (var w = new ChoParquetWriter(filePath)
-                    .ThrowAndStopOnMissingField(false)
-                    )
+                           .ThrowAndStopOnMissingField(false)
+                      )
                 {
                     w.Write(r);
                 }
@@ -1264,6 +1295,7 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
                 w.Print();
             }
         }
+
         static string ReadParquetFileAsJSON(string parquetOutputFilePath, int? recCount = null, JsonSerializerSettings jsonSerializerSettings = null)
         {
             jsonSerializerSettings = jsonSerializerSettings ?? new JsonSerializerSettings
@@ -1277,6 +1309,7 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
                 return JsonConvert.SerializeObject(recs, jsonSerializerSettings);
             }
         }
+
         static string ReadParquetFileAsCSV(string parquetOutputFilePath, int? recCount = null)
         {
             parquetOutputFilePath.Print();
@@ -1286,6 +1319,7 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
                 return ChoCSVWriter.ToTextAll(recs, new ChoCSVRecordConfiguration().WithFirstLineHeader());
             }
         }
+
         static string ReadParquetFileAsCSV<T>(string parquetOutputFilePath, int? recCount = null)
             where T : class
         {
@@ -1312,10 +1346,10 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
             };
 
             using (var r = ChoCSVReader.LoadText(csv)
-                .WithFirstLineHeader()
-                .WithMaxScanRows(2)
-                .QuoteAllFields()
-                )
+                       .WithFirstLineHeader()
+                       .WithMaxScanRows(2)
+                       .QuoteAllFields()
+                  )
             {
                 var dt = r.AsDataTable();
                 dt.Rows[1]["Name"] = DBNull.Value;
@@ -1328,6 +1362,7 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
                 }
             }
         }
+
         [Test]
         public static void POCODateTimeWithMemberConverterTest()
         {
@@ -1360,7 +1395,7 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
 
             TradeWithDateConverter[] recs = null;
             using (var r = new ChoParquetReader<TradeWithDateConverter>(filePath)
-               )
+                  )
             {
                 recs = r.ToArray();
                 recs.Print();
@@ -1381,6 +1416,7 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
             public string Name { get; set; }
             public DateTime? CreateDate { get; set; }
         }
+
         [Test]
         public static void POCODateTimeAsStringTest()
         {
@@ -1428,18 +1464,19 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
 ]";
             //ChoTypeConverterFormatSpec.Instance.DateTimeFormat = "MM/dd/yy HH:mm:ss";
             using (var w = new ChoParquetWriter<TradeWith_NO_DateConverter>(filePath)
-               .Configure(c => c.TypeConverterFormatSpec = new ChoTypeConverterFormatSpec { DateTimeFormat = "o" })
+                       .Configure(c => c.TypeConverterFormatSpec = new ChoTypeConverterFormatSpec { DateTimeFormat = "o" })
                   )
             {
                 //foreach (var rec in tradeList)
                 //    w.Write(rec);
                 w.Write(tradeList);
             }
+
             PrintParquetFile(filePath);
 
             TradeWithDateConverter[] recs = null;
             using (var r = new ChoParquetReader<TradeWithDateConverter>(filePath)
-               )
+                  )
             {
                 recs = r.ToArray();
                 recs.Print();
@@ -1448,6 +1485,7 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
             var actual = JsonConvert.SerializeObject(recs, Formatting.Indented);
             Assert.AreEqual(expected, actual);
         }
+
         [Test]
         public static void DynamicDateTimeAsStringTest()
         {
@@ -1466,14 +1504,15 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
 ]";
             //ChoTypeConverterFormatSpec.Instance.DateTimeFormat = "MM/dd/yy HH:mm:ss";
             using (var w = new ChoParquetWriter(filePath)
-               .Configure(c => c.TypeConverterFormatSpec = new ChoTypeConverterFormatSpec { DateTimeFormat = "MM/dd/yyyy HH" })
-               .TreatDateTimeAsString()
+                       .Configure(c => c.TypeConverterFormatSpec = new ChoTypeConverterFormatSpec { DateTimeFormat = "MM/dd/yyyy HH" })
+                       .TreatDateTimeAsString()
                   )
             {
                 //foreach (var rec in tradeList)
                 //    w.Write(rec);
                 w.Write(x);
             }
+
             PrintParquetFile(filePath);
 
             var actual = ReadParquetFileAsJSON(filePath);
@@ -1528,7 +1567,7 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
   }
 ]";
             using (var w = new ChoParquetWriter<TradeWithDateConverter>(filePath)
-                  //.TreatDateTimeAsDateTimeOffset()
+                   //.TreatDateTimeAsDateTimeOffset()
                   )
             {
                 w.Write(tradeList);
@@ -1542,6 +1581,7 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
                 Assert.AreEqual(expected, actual);
             }
         }
+
         [Test]
         public static void POCOTreatDateTimeAsDateTimeOffsetTestWith_NO_Converter()
         {
@@ -1592,17 +1632,18 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
             //ChoTypeConverterFormatSpec.Instance.DateTimeFormat = "MM/dd/yy HH:mm:ss";
             //ChoTypeDescriptor.RegisterTypeConverterForType(typeof(DateTimeOffset), new ChoDateTimeOffsetConverter());
             using (var w = new ChoParquetWriter<TradeWith_NO_DateConverter>(filePath)
-                  //.TreatDateTimeAsDateTimeOffset()
+                   //.TreatDateTimeAsDateTimeOffset()
                   )
             {
                 //foreach (var rec in tradeList)
                 //    w.Write(rec);
                 w.Write(tradeList);
             }
+
             PrintParquetFile(filePath);
 
             using (var r = new ChoParquetReader<TradeWithDateConverter>(filePath)
-               )
+                  )
             {
                 r.Print();
             }
@@ -1630,6 +1671,7 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
             public double? Price { get; set; }
             public double? Quantity { get; set; }
             public string Name { get; set; }
+
             [ChoTypeConverter(typeof(ChoDateTimeOffsetConverter))]
             public DateTime? CreateDate { get; set; }
         }
@@ -1653,6 +1695,7 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
                     else
                         return ((DateTime)value);
                 }
+
                 return value;
             }
 
@@ -1704,15 +1747,15 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
 ]";
             //var stringJson = JArray.FromObject(deserialized_jsons).ToString();
             using (var r = ChoJSONReader.LoadText(json).ErrorMode(ChoErrorMode.IgnoreAndContinue)
-                .WithField("Decorators", customSerializer: o => o.ToString())
-                .WithField("InstanceID")
-                .WithField("company")
-                )
+                       .WithField("Decorators", customSerializer: o => o.ToString())
+                       .WithField("InstanceID")
+                       .WithField("company")
+                  )
             {
                 using (var w = new ChoParquetWriter(filePath,
-                    new ChoParquetRecordConfiguration { CompressionMethod = Parquet.CompressionMethod.Snappy })
-                .ThrowAndStopOnMissingField(false)
-                .ErrorMode(ChoErrorMode.IgnoreAndContinue))
+                               new ChoParquetRecordConfiguration { CompressionMethod = Parquet.CompressionMethod.Snappy })
+                           .ThrowAndStopOnMissingField(false)
+                           .ErrorMode(ChoErrorMode.IgnoreAndContinue))
                 {
                     w.Write(r);
                 }
@@ -1813,35 +1856,35 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
 ]";
             //var stringJson = JArray.FromObject(deserialized_jsons).ToString();
             using (var r = ChoJSONReader.LoadText(json).ErrorMode(ChoErrorMode.IgnoreAndContinue)
-                .WithField("Stype")
-                .WithField("Decorators", fieldType: typeof(List<Decorator>))
-                .WithField("InstanceID")
-                .WithField("company")
-                )
+                       .WithField("Stype")
+                       .WithField("Decorators", fieldType: typeof(List<Decorator>))
+                       .WithField("InstanceID")
+                       .WithField("company")
+                  )
             {
                 var recs = r.ToArray();
 
                 using (var w = new ChoParquetWriter(filePath,
-                    new ChoParquetRecordConfiguration { CompressionMethod = Parquet.CompressionMethod.Snappy })
-                    .WithField("Stype")
-                    .WithField("Decorators", customSerializer: o => JsonConvert.SerializeObject(o))
-                    .WithField("InstanceID")
-                    .WithField("company")
-                    .UseNestedKeyFormat(false)
-                    .ThrowAndStopOnMissingField(false)
-                    .ErrorMode(ChoErrorMode.IgnoreAndContinue)
-                )
+                               new ChoParquetRecordConfiguration { CompressionMethod = Parquet.CompressionMethod.Snappy })
+                           .WithField("Stype")
+                           .WithField("Decorators", customSerializer: o => JsonConvert.SerializeObject(o))
+                           .WithField("InstanceID")
+                           .WithField("company")
+                           .UseNestedKeyFormat(false)
+                           .ThrowAndStopOnMissingField(false)
+                           .ErrorMode(ChoErrorMode.IgnoreAndContinue)
+                      )
                 {
                     w.Write(recs);
                 }
             }
 
             using (var r = new ChoParquetReader(filePath)
-                    .WithField("Stype")
-                    .WithField("Decorators", customSerializer: o => JsonConvert.DeserializeObject<List<Decorator>>(o.ToString()))
-                    .WithField("InstanceID")
-                    .WithField("company")
-                )
+                       .WithField("Stype")
+                       .WithField("Decorators", customSerializer: o => JsonConvert.DeserializeObject<List<Decorator>>(o.ToString()))
+                       .WithField("InstanceID")
+                       .WithField("company")
+                  )
             {
                 var recs = r.ToArray();
                 var actual = JsonConvert.SerializeObject(recs, Formatting.Indented, new JsonSerializerSettings
@@ -1850,7 +1893,6 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
                 });
                 Assert.AreEqual(expected, actual);
             }
-
         }
 
         [Test]
@@ -1918,35 +1960,35 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
 ]";
             //var stringJson = JArray.FromObject(deserialized_jsons).ToString();
             using (var r = ChoJSONReader.LoadText(json).ErrorMode(ChoErrorMode.IgnoreAndContinue)
-                .WithField("Stype")
-                .WithField("Decorators", fieldType: typeof(List<Decorator>))
-                .WithField("InstanceID")
-                .WithField("company")
-                )
+                       .WithField("Stype")
+                       .WithField("Decorators", fieldType: typeof(List<Decorator>))
+                       .WithField("InstanceID")
+                       .WithField("company")
+                  )
             {
                 var recs = r.ToArray();
 
                 using (var w = new ChoParquetWriter(filePath,
-                    new ChoParquetRecordConfiguration { CompressionMethod = Parquet.CompressionMethod.Snappy })
-                    .WithField("Stype")
-                    .WithField("Decorators", customSerializer: o => JsonConvert.SerializeObject(o))
-                    .WithField("InstanceID")
-                    .WithField("company")
-                    .UseNestedKeyFormat(false)
-                    .ThrowAndStopOnMissingField(false)
-                    .ErrorMode(ChoErrorMode.IgnoreAndContinue)
-                )
+                               new ChoParquetRecordConfiguration { CompressionMethod = Parquet.CompressionMethod.Snappy })
+                           .WithField("Stype")
+                           .WithField("Decorators", customSerializer: o => JsonConvert.SerializeObject(o))
+                           .WithField("InstanceID")
+                           .WithField("company")
+                           .UseNestedKeyFormat(false)
+                           .ThrowAndStopOnMissingField(false)
+                           .ErrorMode(ChoErrorMode.IgnoreAndContinue)
+                      )
                 {
                     w.Write(recs);
                 }
             }
 
             using (var r = new ChoParquetReader(filePath)
-                    .WithField("Stype")
-                    .WithField("Decorators", fieldType: typeof(List<Decorator>))
-                    .WithField("InstanceID")
-                    .WithField("company")
-                )
+                       .WithField("Stype")
+                       .WithField("Decorators", fieldType: typeof(List<Decorator>))
+                       .WithField("InstanceID")
+                       .WithField("company")
+                  )
             {
                 var recs = r.ToArray();
                 var actual = JsonConvert.SerializeObject(recs, Formatting.Indented, new JsonSerializerSettings
@@ -1955,8 +1997,8 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
                 });
                 Assert.AreEqual(expected, actual);
             }
-
         }
+
         public class Trade
         {
             public long? Id { get; set; }
@@ -1983,16 +2025,17 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
                 var dr = cmd.ExecuteReader();
 
                 using (var w = new ChoParquetWriter<Trade>(filePath)
-                    //.Configure(c => c.LiteParsing = true)
-                    .Configure(c => c.RowGroupSize = 5000)
-                    .NotifyAfter(100000)
-                    .OnRowsWritten((o, e) => $"Rows Loaded: {e.RowsWritten} <-- {DateTime.Now}".Print())
-                    .ThrowAndStopOnMissingField(false)
-                    )
+                           //.Configure(c => c.LiteParsing = true)
+                           .Configure(c => c.RowGroupSize = 5000)
+                           .NotifyAfter(100000)
+                           .OnRowsWritten((o, e) => $"Rows Loaded: {e.RowsWritten} <-- {DateTime.Now}".Print())
+                           .ThrowAndStopOnMissingField(false)
+                      )
                 {
                     w.Write(dr);
                 }
             }
+
             string expected = @"[
   {
     ""Id"": ""1381095255"",
@@ -2030,17 +2073,17 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
             using (var r = command.ExecuteReader(CommandBehavior.CloseConnection))
             {
                 using (var parser = new ChoParquetWriter(filePath)
-                    .Configure(c => c.CompressionMethod = Parquet.CompressionMethod.Gzip)
-                    .Configure(c => c.RowGroupSize = 1000)
-                   .TreatDateTimeAsString()
-                    .NotifyAfter(1000)
-                    .OnRowsWritten((o, e) => $"Rows: {e.RowsWritten} <--- {DateTime.Now}".Print())
-                    .Setup(s => s.BeforeRecordFieldWrite += (o, e) =>
-                    {
-                        if (e.Source == DBNull.Value)
-                            e.Source = null;
-                    })
-                    )
+                           .Configure(c => c.CompressionMethod = Parquet.CompressionMethod.Gzip)
+                           .Configure(c => c.RowGroupSize = 1000)
+                           .TreatDateTimeAsString()
+                           .NotifyAfter(1000)
+                           .OnRowsWritten((o, e) => $"Rows: {e.RowsWritten} <--- {DateTime.Now}".Print())
+                           .Setup(s => s.BeforeRecordFieldWrite += (o, e) =>
+                           {
+                               if (e.Source == DBNull.Value)
+                                   e.Source = null;
+                           })
+                      )
                 {
                     if (r.HasRows)
                     {
@@ -2111,12 +2154,12 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
             using (var r = command.ExecuteReader(CommandBehavior.CloseConnection))
             {
                 using (var parser = new ChoParquetWriter(filePath)
-                    .Configure(c => c.CompressionMethod = Parquet.CompressionMethod.Gzip)
-                    .Configure(c => c.RowGroupSize = 1000)
-                   .TreatDateTimeAsString()
-                    .NotifyAfter(1000)
-                    .OnRowsWritten((o, e) => $"Rows: {e.RowsWritten} <--- {DateTime.Now}".Print())
-                    )
+                           .Configure(c => c.CompressionMethod = Parquet.CompressionMethod.Gzip)
+                           .Configure(c => c.RowGroupSize = 1000)
+                           .TreatDateTimeAsString()
+                           .NotifyAfter(1000)
+                           .OnRowsWritten((o, e) => $"Rows: {e.RowsWritten} <--- {DateTime.Now}".Print())
+                      )
                 {
                     if (r.HasRows)
                     {
@@ -2171,6 +2214,7 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
             var actual = ReadParquetFileAsJSON(filePath, 2);
             Assert.AreEqual(expected, actual);
         }
+
         [Test]
         public static void Issue144_UsingFieldLevelValueConverter()
         {
@@ -2186,14 +2230,14 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
             using (var r = command.ExecuteReader(CommandBehavior.CloseConnection))
             {
                 using (var parser = new ChoParquetWriter(filePath)
-                    .WithField("LastName")
-                    .WithField("FirstName")
-                    .WithField("ReportsTo", valueConverter: o => o == DBNull.Value ? null : o)
-                    .Configure(c => c.CompressionMethod = Parquet.CompressionMethod.Gzip)
-                    .Configure(c => c.RowGroupSize = 1000)
-                    .NotifyAfter(1000)
-                    .OnRowsWritten((o, e) => $"Rows: {e.RowsWritten} <--- {DateTime.Now}".Print())
-                    )
+                           .WithField("LastName")
+                           .WithField("FirstName")
+                           .WithField("ReportsTo", valueConverter: o => o == DBNull.Value ? null : o)
+                           .Configure(c => c.CompressionMethod = Parquet.CompressionMethod.Gzip)
+                           .Configure(c => c.RowGroupSize = 1000)
+                           .NotifyAfter(1000)
+                           .OnRowsWritten((o, e) => $"Rows: {e.RowsWritten} <--- {DateTime.Now}".Print())
+                      )
                 {
                     if (r.HasRows)
                     {
@@ -2235,6 +2279,7 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
                 return value;
             }
         }
+
         [Test]
         public static void Issue144_UsingCustomConverter()
         {
@@ -2250,12 +2295,12 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
             using (var r = command.ExecuteReader(CommandBehavior.CloseConnection))
             {
                 using (var parser = new ChoParquetWriter(filePath)
-                    .Configure(c => c.CompressionMethod = Parquet.CompressionMethod.Gzip)
-                    .Configure(c => c.RowGroupSize = 1000)
-                   .TreatDateTimeAsString()
-                    .NotifyAfter(1000)
-                    .OnRowsWritten((o, e) => $"Rows: {e.RowsWritten} <--- {DateTime.Now}".Print())
-                    )
+                           .Configure(c => c.CompressionMethod = Parquet.CompressionMethod.Gzip)
+                           .Configure(c => c.RowGroupSize = 1000)
+                           .TreatDateTimeAsString()
+                           .NotifyAfter(1000)
+                           .OnRowsWritten((o, e) => $"Rows: {e.RowsWritten} <--- {DateTime.Now}".Print())
+                      )
                 {
                     if (r.HasRows)
                     {
@@ -2319,8 +2364,8 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
             string expected = @"Id,Price,Quantity,CreateDateTime,IsActive,Total
 ,,2.45,,,";
             using (var w = new ChoParquetWriter<Trade>(filePath)
-                   .TreatDateTimeAsString()
-                )
+                       .TreatDateTimeAsString()
+                  )
             {
                 w.Write(new Trade
                 {
@@ -2371,15 +2416,16 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
 
             var pf = "dt.parquet";
             using (var w = new ChoParquetWriter(pf)
-                .UseNestedKeyFormat(false))
+                       .UseNestedKeyFormat(false))
             {
                 w.Write(dataTable);
             }
-
         }
+
         private static void CreateTestCSVFile(int lineCount = 10000)
         {
-            var csvHeader = @"SvyStartTime,Technical_module/TechnicalBasic_submodule/SvyDate,Technical_module/TechnicalBasic_submodule/ID00,Technical_module/TechnicalBasic_submodule/ID01,Technical_module/TechnicalBasic_submodule/ID02,Technical_module/TechnicalBasic_submodule/ID03,Technical_module/TechnicalBasic_submodule/ID04,Technical_module/TechnicalBasic_submodule/ID05,Technical_module/TechnicalBasic_submodule/ID04LABEL,Technical_module/TechnicalBasic_submodule/ID05LABEL,Technical_module/TechnicalBasic_submodule/ID06CAL,Technical_module/TechnicalBasic_submodule/ID06,Technical_module/TechnicalBasic_submodule/ID07,Technical_module/TechnicalBasic_submodule/HHID,Technical_module/TechnicalBasic_submodule/EnuSupervisorName,Technical_module/TechnicalBasic_submodule/EnuChefEquipeName,Technical_module/TechnicalBasic_submodule/EnuSexTL,Technical_module/TechnicalBasic_submodule/EnuName,Technical_module/TechnicalBasic_submodule/EnuSex,Technical_module/RESPConsentAssesment,Demographic_module/DemographicBasic_submodule/TypeHousehold,Demographic_module/DemographicBasic_submodule/HHStatusOther,Demographic_module/DemographicBasic_submodule/HHStatus,Demographic_module/DemographicBasic_submodule/RESPAge,Demographic_module/DemographicBasic_submodule/RespSex,Demographic_module/DemographicBasic_submodule/RESPRelationHHH,Demographic_module/DemographicBasic_submodule/HHHSex,Demographic_module/DemographicBasic_submodule/HHHAge,Demographic_module/DemographicBasic_submodule/HHHStatus,Demographic_module/DemographicBasic_submodule/HHMemberInfo_submodule/HHSize,Demographic_module/DemographicBasic_submodule/Homme/HHSize01M,Demographic_module/DemographicBasic_submodule/Homme/HHSize24M,Demographic_module/DemographicBasic_submodule/Homme/HHSize511M,Demographic_module/DemographicBasic_submodule/Homme/HHSize1217M,Demographic_module/DemographicBasic_submodule/Homme/HHSize1859M,Demographic_module/DemographicBasic_submodule/Homme/HHSize60AboveM,Demographic_module/DemographicBasic_submodule/Femme/HHSize01F,Demographic_module/DemographicBasic_submodule/Femme/HHSize24F,Demographic_module/DemographicBasic_submodule/Femme/HHSize511F,Demographic_module/DemographicBasic_submodule/Femme/HHSize1217F,Demographic_module/DemographicBasic_submodule/Femme/HHSize1859F,Demographic_module/DemographicBasic_submodule/Femme/HHSize60AboveF,Demographic_module/DemographicBasic_submodule/B25,Demographic_module/DemographicBasic_submodule/B20,Demographic_module/DemographicAdditional_submodule/HHDependentNb,Demographic_module/DemographicAdditional_submodule/HHPregLactNb,Demographic_module/DemographicAdditional_submodule/HHCaregiver,Demographic_module/DemographicAdditional_submodule/HHCaregiver_oth,Demographic_module/DisabilityHHH_submodule/HHHDisabSee,Demographic_module/DisabilityHHH_submodule/HHHDisabHear,Demographic_module/DisabilityHHH_submodule/HHHDisabWalk,Demographic_module/DisabilityHHH_submodule/HHHDisabRemember,Demographic_module/DisabilityHHH_submodule/HHHDisabUnderstand,Demographic_module/DisabilityHHH_submodule/HHHDisabWash,Demographic_module/Education_submodule/AC1,Demographic_module/Education_submodule/AC2,Demographic_module/Education_submodule/AC3,Demographic_module/Education_submodule/AC4,Demographic_module/Education_submodule/AC5,Demographic_module/Education_submodule/AC6,Demographic_module/Education_submodule/Classe_suivie,Demographic_module/Education_submodule/HHNoSchool,Demographic_module/Education_submodule/HHNoSchoolAttNb,Demographic_module/Education_submodule/HHNoSchoolWhy/101,Demographic_module/Education_submodule/HHNoSchoolWhy/102,Demographic_module/Education_submodule/HHNoSchoolWhy/103,Demographic_module/Education_submodule/HHNoSchoolWhy/104,Demographic_module/Education_submodule/HHNoSchoolWhy/112,Demographic_module/Education_submodule/HHNoSchoolWhy/200,Demographic_module/Education_submodule/HHNoSchoolWhy/300,Demographic_module/Education_submodule/HHNoSchoolWhy/400,Demographic_module/Education_submodule/HHNoSchoolWhy/500,Demographic_module/Education_submodule/HHNoSchoolWhy/600,Demographic_module/Education_submodule/HHNoSchoolWhy/700,Demographic_module/Education_submodule/HHNoSchoolWhy/800,Demographic_module/Education_submodule/HHNoSchoolWhy/888,Demographic_module/Education_submodule/HHNoSchoolWhy/999,Demographic_module/Education_submodule/HHNoSchoolWhy/1000,Demographic_module/Education_submodule/HHNoSchoolWhy_oth,Demographic_module/Education_submodule/numberM612,Demographic_module/Education_submodule/numberF612,Demographic_module/Education_submodule/absentM,Demographic_module/Education_submodule/Raison1/1,Demographic_module/Education_submodule/Raison1/2,Demographic_module/Education_submodule/Raison1/3,Demographic_module/Education_submodule/Raison1/4,Demographic_module/Education_submodule/Raison1/5,Demographic_module/Education_submodule/Raison1/6,Demographic_module/Education_submodule/Raison1/7,Demographic_module/Education_submodule/Raison1/8,Demographic_module/Education_submodule/absentF,Demographic_module/Education_submodule/Raison2/1,Demographic_module/Education_submodule/Raison2/2,Demographic_module/Education_submodule/Raison2/3,Demographic_module/Education_submodule/Raison2/4,Demographic_module/Education_submodule/Raison2/5,Demographic_module/Education_submodule/Raison2/6,Demographic_module/Education_submodule/Raison2/7,Demographic_module/Education_submodule/Raison2/8,Demographic_module/Education_submodule/existeH,Demographic_module/Education_submodule/number_Abondon_M,Demographic_module/Education_submodule/Raison3/1,Demographic_module/Education_submodule/Raison3/2,Demographic_module/Education_submodule/Raison3/3,Demographic_module/Education_submodule/Raison3/4,Demographic_module/Education_submodule/Raison3/5,Demographic_module/Education_submodule/Raison3/6,Demographic_module/Education_submodule/Raison3/7,Demographic_module/Education_submodule/Raison3/8,Demographic_module/Education_submodule/existeF,Demographic_module/Education_submodule/number_Abondon_F,Demographic_module/Education_submodule/Raison4/1,Demographic_module/Education_submodule/Raison4/2,Demographic_module/Education_submodule/Raison4/3,Demographic_module/Education_submodule/Raison4/4,Demographic_module/Education_submodule/Raison4/5,Demographic_module/Education_submodule/Raison4/6,Demographic_module/Education_submodule/Raison4/7,Demographic_module/Education_submodule/Raison4/8,Demographic_module/Education_submodule/AC17,Demographic_module/Education_submodule/AC18,Health_module/HealthBasic_submodule/HHChronIllNb,Health_module/HealthBasic_submodule/HHHealthAccess,Health_module/HealthBasic_submodule/HHHealthmin,Health_module/HealthBasic_submodule/HHHealthProvider,Health_module/HealthBasic_submodule/HHHealthAccess_1M,Health_module/HealthBasic_submodule/HHHealthProvider_1M,Health_module/HealthBasic_submodule/HHHealthConstr,Health_module/HealthBasic_submodule/HHHealthConstr_oth,Health_module/HealthTreatment_submodule/MDDIHHENHealthMed_Avant,Health_module/HealthTreatment_submodule/MDDIHHENHealthMed_milieu,Health_module/HealthTreatment_submodule/MDDIHHENHealthMed,Health_module/HealthTreatment_submodule/MDDIHHENHealthMedWhy,Health_module/HealthTreatment_submodule/MDDIHHENHealthMedWhy_oth,Housing_module/Acces_market/acces_marche1,Housing_module/Acces_market/raison_acces_marche,Housing_module/Acces_market/time_min,Housing_module/HouseBasic_submodule/HHDwellType,Housing_module/HouseBasic_submodule/HHDwellType_oth,Housing_module/HouseBasic_submodule/HHTenureType,Housing_module/HouseBasic_submodule/HHTenureType_oth,Housing_module/HouseBasic_submodule/HHWallType,Housing_module/HouseBasic_submodule/HHWallType_oth,Housing_module/HouseBasic_submodule/HHRoofType,Housing_module/HouseBasic_submodule/HHRoofType_oth,Housing_module/HouseBasic_submodule/HHFloorType,Housing_module/HouseBasic_submodule/HHFloorType_oth,Housing_module/HouseBasic_submodule/HHDwellCond,Housing_module/SanitationBasic_submodule/HHENHygiene/0,Housing_module/SanitationBasic_submodule/HHENHygiene/10,Housing_module/SanitationBasic_submodule/HHENHygiene/20,Housing_module/SanitationBasic_submodule/HHENHygiene/21,Housing_module/SanitationBasic_submodule/HHENHygiene/22,Housing_module/SanitationBasic_submodule/HHENHygiene/23,Housing_module/SanitationBasic_submodule/HHENHygiene/30,Housing_module/SanitationBasic_submodule/HHENHygiene/999,Housing_module/SanitationBasic_submodule/HHENHygieneAccess,Housing_module/SanitationBasic_submodule/HHToiletType,Housing_module/SanitationBasic_submodule/HHToiletType_oth,Housing_module/SanitationBasic_submodule/HHToiletWho,Housing_module/SanitationBasic_submodule/HHToiletWho_oth,Housing_module/SanitationAdditional_submodule/HHToiletDist,Housing_module/SanitationAdditional_submodule/HHWasteOut,Housing_module/SanitationAdditional_submodule/HHWasteOut_oth,Housing_module/EnergyBasic_submodule/HHEnerCookSRC,Housing_module/EnergyBasic_submodule/HHEnerLightSRC,Housing_module/WaterSources_submodule/HHWaterSRC,Housing_module/WaterSources_submodule/HHWaterSRC_oth,Housing_module/WaterSources_submodule/HHWaterSRC_Wet,Housing_module/WaterSources_submodule/HHWaterSRC_Dry,Housing_module/WaterSources_submodule/HHWaterSRCMonth/101,Housing_module/WaterSources_submodule/HHWaterSRCMonth/102,Housing_module/WaterSources_submodule/HHWaterSRCMonth/103,Housing_module/WaterSources_submodule/HHWaterSRCMonth/104,Housing_module/WaterSources_submodule/HHWaterSRCMonth/105,Housing_module/WaterSources_submodule/HHWaterSRCMonth/106,Housing_module/WaterSources_submodule/HHWaterSRCMonth/107,Housing_module/WaterSources_submodule/HHWaterSRCMonth/108,Housing_module/WaterSources_submodule/HHWaterSRCMonth/109,Housing_module/WaterSources_submodule/HHWaterSRCMonth/110,Housing_module/WaterSources_submodule/HHWaterSRCMonth/111,Housing_module/WaterSources_submodule/HHWaterSRCMonth/112,Housing_module/WaterSources_submodule/HHWaterLoc,Housing_module/WaterSources_submodule/HHWaterLoc_oth,Housing_module/WaterSources_submodule/HHWaterSecSRC,Housing_module/WaterSources_submodule/HHWaterSecSRC_Wet,Housing_module/WaterSources_submodule/HHWaterSecSRC_Dry,Housing_module/WaterSources_submodule/HHWaterSecSRC_oth,Housing_module/WaterSources_submodule/HHWaterSecSRCMonth/101,Housing_module/WaterSources_submodule/HHWaterSecSRCMonth/102,Housing_module/WaterSources_submodule/HHWaterSecSRCMonth/103,Housing_module/WaterSources_submodule/HHWaterSecSRCMonth/104,Housing_module/WaterSources_submodule/HHWaterSecSRCMonth/105,Housing_module/WaterSources_submodule/HHWaterSecSRCMonth/106,Housing_module/WaterSources_submodule/HHWaterSecSRCMonth/107,Housing_module/WaterSources_submodule/HHWaterSecSRCMonth/108,Housing_module/WaterSources_submodule/HHWaterSecSRCMonth/109,Housing_module/WaterSources_submodule/HHWaterSecSRCMonth/110,Housing_module/WaterSources_submodule/HHWaterSecSRCMonth/111,Housing_module/WaterSources_submodule/HHWaterSecSRCMonth/112,Housing_module/WaterTreatment_submodule/HHWaterTreat,Housing_module/WaterTreatment_submodule/HHWaterTreatWhen,Housing_module/WaterTreatment_submodule/HHWaterTreatType,Housing_module/WaterTreatment_submodule/HHWaterTreatType_oth,FoodConsumption_module/FCS_FCSN_HDDS_submodule/FCSStap,FoodConsumption_module/FCS_FCSN_HDDS_submodule/FCSStap_SRf,FoodConsumption_module/FCS_FCSN_HDDS_submodule/HDDSStapCer,FoodConsumption_module/FCS_FCSN_HDDS_submodule/HDDSStapRoot,FoodConsumption_module/FCS_FCSN_HDDS_submodule/FCSPulse,FoodConsumption_module/FCS_FCSN_HDDS_submodule/FCSPulse_SRf,FoodConsumption_module/FCS_FCSN_HDDS_submodule/HDDSPulse,FoodConsumption_module/FCS_FCSN_HDDS_submodule/FCSDairy,FoodConsumption_module/FCS_FCSN_HDDS_submodule/FCSDairy_SRf,FoodConsumption_module/FCS_FCSN_HDDS_submodule/HDDSDairy,FoodConsumption_module/FCS_FCSN_HDDS_submodule/FCSPr,FoodConsumption_module/FCS_FCSN_HDDS_submodule/FCSPr_SRf,FoodConsumption_module/FCS_FCSN_HDDS_submodule/FCSNPrMeatF,FoodConsumption_module/FCS_FCSN_HDDS_submodule/HDDSPrMeatF,FoodConsumption_module/FCS_FCSN_HDDS_submodule/FCSNPrMeatO,FoodConsumption_module/FCS_FCSN_HDDS_submodule/HDDSPrMeatO,FoodConsumption_module/FCS_FCSN_HDDS_submodule/FCSNPrFish,FoodConsumption_module/FCS_FCSN_HDDS_submodule/HDDSPrFish,FoodConsumption_module/FCS_FCSN_HDDS_submodule/FCSNPrEggs,FoodConsumption_module/FCS_FCSN_HDDS_submodule/HDDSPrEggs,FoodConsumption_module/FCS_FCSN_HDDS_submodule/FCSVeg,FoodConsumption_module/FCS_FCSN_HDDS_submodule/FCSVeg_SRf,FoodConsumption_module/FCS_FCSN_HDDS_submodule/FCSNVegOrg,FoodConsumption_module/FCS_FCSN_HDDS_submodule/FCSNVegGre,FoodConsumption_module/FCS_FCSN_HDDS_submodule/HDDSVeg,FoodConsumption_module/FCS_FCSN_HDDS_submodule/FCSFruit,FoodConsumption_module/FCS_FCSN_HDDS_submodule/FCSFruit_SRf,FoodConsumption_module/FCS_FCSN_HDDS_submodule/FCSNFruiOrg,FoodConsumption_module/FCS_FCSN_HDDS_submodule/HDDSFruit,FoodConsumption_module/FCS_FCSN_HDDS_submodule/FCSFat,FoodConsumption_module/FCS_FCSN_HDDS_submodule/FCSFat_SRf,FoodConsumption_module/FCS_FCSN_HDDS_submodule/HDDSFat,FoodConsumption_module/FCS_FCSN_HDDS_submodule/FCSSugar,FoodConsumption_module/FCS_FCSN_HDDS_submodule/FCSSugar_SRf,FoodConsumption_module/FCS_FCSN_HDDS_submodule/HDDSSugar,FoodConsumption_module/FCS_FCSN_HDDS_submodule/FCSCond,FoodConsumption_module/FCS_FCSN_HDDS_submodule/FCSCond_SRf,FoodConsumption_module/FCS_FCSN_HDDS_submodule/HDDSCond,FoodConsumption_module/FIES_submodule/WORRIED,FoodConsumption_module/FIES_submodule/HEALTHY,FoodConsumption_module/FIES_submodule/FEWFOODS,FoodConsumption_module/FIES_submodule/SKIPPED,FoodConsumption_module/FIES_submodule/ATELESS,FoodConsumption_module/FIES_submodule/RUNOUT,FoodConsumption_module/FIES_submodule/HUNGRY,FoodConsumption_module/FIES_submodule/WHLDAY,FoodConsumption_module/HHS_submodule/HHSNoFood,FoodConsumption_module/HHS_submodule/HHSNoFood_FR,FoodConsumption_module/HHS_submodule/HHSBedHung,FoodConsumption_module/HHS_submodule/HHSBedHung_FR,FoodConsumption_module/HHS_submodule/HHSNotEat,FoodConsumption_module/HHS_submodule/HHSNotEat_FR,CopingStrategies_module/LhCSRural_submodule/LcsR_stress_DomAsset,CopingStrategies_module/LhCSRural_submodule/LcsR_stress_Saving,CopingStrategies_module/LhCSRural_submodule/LcsR_stress_BorrowCash,CopingStrategies_module/LhCSRural_submodule/LcsR_stress_CrdtFood,CopingStrategies_module/LhCSRural_submodule/LcsR_stress_Utilities,CopingStrategies_module/LhCSRural_submodule/LcsR_crisis_ImmCrops,CopingStrategies_module/LhCSRural_submodule/LcsR_crisis_Seed,CopingStrategies_module/LhCSRural_submodule/LcsR_crisis_ProdAssets,CopingStrategies_module/LhCSRural_submodule/Lcs_crisis_Health,CopingStrategies_module/LhCSRural_submodule/LcsR_em_ResAsset,CopingStrategies_module/LhCSRural_submodule/LcsR_em_Begged,CopingStrategies_module/LhCSRural_submodule/LcsR_em_IllegalAct,CopingStrategies_module/rCSI_submodule/rCSILessQlty,CopingStrategies_module/rCSI_submodule/rCSIBorrow,CopingStrategies_module/rCSI_submodule/rCSIMealSize,CopingStrategies_module/rCSI_submodule/rCSIMealAdult,CopingStrategies_module/rCSI_submodule/rCSIMealNb,Expenditures_module/Food_submodule/HHExpFCer_Purch_7D,Expenditures_module/Food_submodule/HHExpFCer_Purch_MN_7D,Expenditures_module/Food_submodule/HHExpFCer_GiftAid_7D,Expenditures_module/Food_submodule/HHExpFCer_GiftAid_MN_7D,Expenditures_module/Food_submodule/HHExpFCer_Own_7D,Expenditures_module/Food_submodule/HHExpFCer_Own_MN_7D,Expenditures_module/Food_submodule/HHExpFTub_Purch_7D,Expenditures_module/Food_submodule/HHExpFTub_Purch_MN_7D,Expenditures_module/Food_submodule/HHExpFTub_GiftAid_7D,Expenditures_module/Food_submodule/HHExpFTub_GiftAid_MN_7D,Expenditures_module/Food_submodule/HHExpFTub_Own_7D,Expenditures_module/Food_submodule/HHExpFTub_Own_MN_7D,Expenditures_module/Food_submodule/HHExpFTub_Purch_7D_other,Expenditures_module/Food_submodule/HHExpFTub_Purch_MN_7D2_other,Expenditures_module/Food_submodule/HHExpFTub_GiftAid_7D_other,Expenditures_module/Food_submodule/HHExpFTub_GiftAid_MN_7D_other,Expenditures_module/Food_submodule/HHExpFTub_Own_7D_other,Expenditures_module/Food_submodule/HHExpFTub_Own_MN_7D_other,Expenditures_module/Food_submodule/HHExpFPuls_Purch_7D,Expenditures_module/Food_submodule/HHExpFPuls_Purch_MN_7D,Expenditures_module/Food_submodule/HHExpFPuls_GiftAid_7D,Expenditures_module/Food_submodule/HHExpFPuls_GiftAid_MN_7D,Expenditures_module/Food_submodule/HHExpFPuls_Own_7D,Expenditures_module/Food_submodule/HHExpFPuls_Own_MN_7D,Expenditures_module/Food_submodule/HHExpFVeg_Purch_7D,Expenditures_module/Food_submodule/HHExpFVeg_Purch_MN_7D,Expenditures_module/Food_submodule/HHExpFVeg_GiftAid_7D,Expenditures_module/Food_submodule/HHExpFVeg_GiftAid_MN_7D,Expenditures_module/Food_submodule/HHExpFVeg_Own_7D,Expenditures_module/Food_submodule/HHExpFVeg_Own_MN_7D,Expenditures_module/Food_submodule/HHExpFFrt_Purch_7D,Expenditures_module/Food_submodule/HHExpFFrt_Purch_MN_7D,Expenditures_module/Food_submodule/HHExpFFrt_GiftAid_7D,Expenditures_module/Food_submodule/HHExpFFrt_GiftAid_MN_7D,Expenditures_module/Food_submodule/HHExpFFrt_Own_7D,Expenditures_module/Food_submodule/HHExpFFrt_Own_MN_7D,Expenditures_module/Food_submodule/HHExpFAnimMeat_Purch_7D,Expenditures_module/Food_submodule/HHExpFAnimMeat_Purch_MN_7D,Expenditures_module/Food_submodule/HHExpFAnimMeat_GiftAid_7D,Expenditures_module/Food_submodule/HHExpFAnimMeat_GiftAid_MN_7D,Expenditures_module/Food_submodule/HHExpFAnimMeat_Own_7D,Expenditures_module/Food_submodule/HHExpFAnimMeat_Own_MN_7D,Expenditures_module/Food_submodule/HHExpFAnimFish_Purch_7D,Expenditures_module/Food_submodule/HHExpFAnimFish_Purch_MN_7D,Expenditures_module/Food_submodule/HHExpFAnimFish_GiftAid_7D,Expenditures_module/Food_submodule/HHExpFAnimFish_GiftAid_MN_7D,Expenditures_module/Food_submodule/HHExpFAnimFish_Own_7D,Expenditures_module/Food_submodule/HHExpFAnimFish_Own_MN_7D,Expenditures_module/Food_submodule/HHExpFFats_Purch_7D,Expenditures_module/Food_submodule/HHExpFFats_Purch_MN_7D,Expenditures_module/Food_submodule/HHExpFFats_GiftAid_7D,Expenditures_module/Food_submodule/HHExpFFats_GiftAid_MN_7D,Expenditures_module/Food_submodule/HHExpFFats_Own_7D,Expenditures_module/Food_submodule/HHExpFFats_Own_MN_7D,Expenditures_module/Food_submodule/HHExpFDairy_Purch_7D,Expenditures_module/Food_submodule/HHExpFDairy_Purch_MN_7D,Expenditures_module/Food_submodule/HHExpFDairy_GiftAid_7D,Expenditures_module/Food_submodule/HHExpFDairy_GiftAid_MN_7D,Expenditures_module/Food_submodule/HHExpFDairy_Own_7D,Expenditures_module/Food_submodule/HHExpFDairy_Own_MN_7D,Expenditures_module/Food_submodule/HHExpFEgg_Purch_7D,Expenditures_module/Food_submodule/HHExpFEgg_Purch_MN_7D,Expenditures_module/Food_submodule/HHExpFEgg_GiftAid_7D,Expenditures_module/Food_submodule/HHExpFEgg_GiftAid_MN_7D,Expenditures_module/Food_submodule/HHExpFEgg_Own_7D,Expenditures_module/Food_submodule/HHExpFEgg_Own_MN_7D,Expenditures_module/Food_submodule/HHExpFSgr_Purch_7D,Expenditures_module/Food_submodule/HHExpFSgr_Purch_MN_7D,Expenditures_module/Food_submodule/HHExpFSgr_GiftAid_7D,Expenditures_module/Food_submodule/HHExpFSgr_GiftAid_MN_7D,Expenditures_module/Food_submodule/HHExpFSgr_Own_7D,Expenditures_module/Food_submodule/HHExpFSgr_Own_MN_7D,Expenditures_module/Food_submodule/HHExpFCond_Purch_7D,Expenditures_module/Food_submodule/HHExpFCond_Purch_MN_7D,Expenditures_module/Food_submodule/HHExpFCond_GiftAid_7D,Expenditures_module/Food_submodule/HHExpFCond_GiftAid_MN_7D,Expenditures_module/Food_submodule/HHExpFCond_Own_7D,Expenditures_module/Food_submodule/HHExpFCond_Own_MN_7D,Expenditures_module/Food_submodule/HHExpFBev_Purch_7D,Expenditures_module/Food_submodule/HHExpFBev_Purch_MN_7D,Expenditures_module/Food_submodule/HHExpFBev_GiftAid_7D,Expenditures_module/Food_submodule/HHExpFBev_GiftAid_MN_7D,Expenditures_module/Food_submodule/HHExpFBev_Own_7D,Expenditures_module/Food_submodule/HHExpFBev_Own_MN_7D,Expenditures_module/Food_submodule/HHExpFOut_Purch_7D,Expenditures_module/Food_submodule/HHExpFOut_Purch_MN_7D,Expenditures_module/Food_submodule/HHExpFOut_GiftAid_7D,Expenditures_module/Food_submodule/HHExpFOut_GiftAid_MN_7D,Expenditures_module/Food_submodule/HHExpFOut_Own_7D,Expenditures_module/Food_submodule/HHExpFOut_Own_MN_7D,Expenditures_module/NonFoodConsumption_submodule/HHExpNFHyg_Purch_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFHyg_Purch_MN_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFHyg_GiftAid_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFHyg_GiftAid_MN_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFTransp_Purch_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFTransp_Purch_MN_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFTransp_GiftAid_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFTransp_GiftAid_MN_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFFuel_Purch_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFFuel_Purch_MN_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFFuel_GiftAid_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFFuel_GiftAid_MN_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFWat_Purch_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFWat_Purch_MN_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFWat_GiftAid_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFWat_GiftAid_MN_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFElec_Purch_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFElec_Purch_MN_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFElec_GiftAid_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFElec_GiftAid_MN_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFEnerg_Purch_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFEnerg_Purch_MN_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFEnerg_GiftAid_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFEnerg_GiftAid_MN_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFDwelSer_Purch_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFDwelSer_Purch_MN_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFDwelSer_GiftAid_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFDwelSer_GiftAid_MN_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFPhone_Purch_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFPhone_Purch_MN_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFPhone_GiftAid_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFPhone_GiftAid_MN_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFRecr_Purch_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFRecr_Purch_MN_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFRecr_GiftAid_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFRecr_GiftAid_MN_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFAlcTobac_Purch_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFAlcTobac_Purch_MN_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFAlcTobac_GiftAid_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFAlcTobac_GiftAid_MN_1M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFMedServ_Purch_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFMedServ_Purch_MN_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFMedServ_GiftAid_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFMedServ_GiftAid_MN_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFMedGood_Purch_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFMedGood_Purch_MN_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFMedGood_GiftAid_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFMedGood_GiftAid_MN_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFCloth_Purch_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFCloth_Purch_MN_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFCloth_GiftAid_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFCloth_GiftAid_MN_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFEduFee_Purch_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFEduFee_Purch_MN_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFEduFee_GiftAid_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFEduFee_GiftAid_MN_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFEduGood_Purch_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFEduGood_Purch_MN_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFEduGood_GiftAid_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFEduGood_GiftAid_MN_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFRent_Purch_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFRent_Purch_MN_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFRent_GiftAid_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFRent_GiftAid_MN_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFHHSoft_Purch_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFHHSoft_Purch_MN_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFHHSoft_GiftAid_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFHHSoft_GiftAid_MN_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFHHMaint_Purch_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFHHMaint_Purch_MN_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFHHMaint_GiftAid_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFHHMaint_GiftAid_MN_6M,Income_module/Income_submodule/HHIncNb,Income_module/Income_submodule/HHIncFirst_SRi,Income_module/Income_submodule/HHIncFirst_SRi_other,Income_module/Income_submodule/HHIncFirst_Est,Income_module/Income_submodule/HHIncFirst_Est2,Income_module/Income_submodule/HHIncFirst_Dur,Income_module/Income_submodule/HHIncFirst_PCT,Income_module/Income_submodule/HHIncFirst_LocInc,Income_module/Income_submodule/HHIncSec_SRi,Income_module/Income_submodule/HHIncSec_SRi_other,Income_module/Income_submodule/HHIncSec_Est,Income_module/Income_submodule/HHIncSec_Est2,Income_module/Income_submodule/HHIncSec_LocInc,Income_module/Income_submodule/HHIncSec_PCT,Income_module/Income_submodule/HHIncSec_Dur,Income_module/Income_submodule/HHIncThird_SRi,Income_module/Income_submodule/HHIncThird_SRi_other,Income_module/Income_submodule/HHIncThird_Est,Income_module/Income_submodule/HHIncThird_Est2,Income_module/Income_submodule/HHIncThird_LocInc,Income_module/Income_submodule/HHIncThird_PCT,Income_module/Income_submodule/HHIncThird_Dur,Income_module/Income_submodule/HHIncF_PCT,Income_module/Income_submodule/HHInc017_PCT,Income_module/Income_submodule/HHRemitt_YN_6M,Income_module/Income_submodule/HHRemitt_Est_6M,Income_module/Income_submodule/HHRemitt_LocInc_6M,Income_module/Income_submodule/HHIncConstr/1,Income_module/Income_submodule/HHIncConstr/2,Income_module/Income_submodule/HHIncConstr/3,Income_module/Income_submodule/HHIncConstr/4,Income_module/Income_submodule/HHIncConstr/5,Income_module/Income_submodule/HHIncConstr/6,Income_module/Income_submodule/HHIncConstr/7,Income_module/Income_submodule/HHIncConstr/8,Income_module/Income_submodule/HHIncConstr/9,Income_module/Income_submodule/HHIncConstr/10,Income_module/Income_submodule/HHIncConstr/999,Income_module/Income_submodule/HHIncConstr_oth,Income_module/Income_submodule/HHCreditAccess,Income_module/Income_submodule/HHCreditSRC/100,Income_module/Income_submodule/HHCreditSRC/101,Income_module/Income_submodule/HHCreditSRC/102,Income_module/Income_submodule/HHCreditSRC/200,Income_module/Income_submodule/HHCreditSRC/300,Income_module/Income_submodule/HHCreditSRC/301,Income_module/Income_submodule/HHCreditSRC/302,Income_module/Income_submodule/HHCreditSRC/400,Income_module/Income_submodule/HHCreditSRC/500,Income_module/Income_submodule/HHCreditSRC/600,Income_module/Income_submodule/HHCreditSRC/700,Income_module/Income_submodule/HHCreditSRC/999,Income_module/Income_submodule/HHCreditSRC_oth,Income_module/Income_submodule/HHBorrowYN,Income_module/Income_submodule/HHBorrowEst,Income_module/Income_submodule/HHBorrowWhy,Income_module/Income_submodule/HHBorrowWhy_oth,Income_module/Income_submodule/HHBorrowFrom,Income_module/Income_submodule/HHBorrowFrom_oth,Income_module/Income_submodule/HHDebt,Income_module/Income_submodule/HHDebt_Est,Income_module/Income_submodule/HHDebtPaidHow,Income_module/Income_submodule/HHDebtPaidHow_oth,Income_module/Income_submodule/HHDebtPaidWhen,Income_module/Income_submodule/AC14,DisplacementMigrationHosts_module/DisplacementBasic_submodule/HHDispl,DisplacementMigrationHosts_module/DisplacementBasic_submodule/HHHDisplArrive,DisplacementMigrationHosts_module/DisplacementBasic_submodule/HHDisplWhyFirst/100,DisplacementMigrationHosts_module/DisplacementBasic_submodule/HHDisplWhyFirst/200,DisplacementMigrationHosts_module/DisplacementBasic_submodule/HHDisplWhyFirst/300,DisplacementMigrationHosts_module/DisplacementBasic_submodule/HHDisplWhyFirst/400,DisplacementMigrationHosts_module/DisplacementBasic_submodule/HHDisplWhyFirst/500,DisplacementMigrationHosts_module/DisplacementBasic_submodule/HHDisplWhyFirst/600,DisplacementMigrationHosts_module/DisplacementBasic_submodule/HHDisplWhyFirst/700,DisplacementMigrationHosts_module/DisplacementBasic_submodule/HHDisplWhyFirst/800,DisplacementMigrationHosts_module/DisplacementBasic_submodule/HHDisplWhyFirst/900,DisplacementMigrationHosts_module/DisplacementBasic_submodule/HHDisplWhyFirst/999,DisplacementMigrationHosts_module/DisplacementBasic_submodule/HHDisplWhyFirst/1100,DisplacementMigrationHosts_module/DisplacementBasic_submodule/HHDisplWhyFirst/1200,DisplacementMigrationHosts_module/DisplacementBasic_submodule/HHDisplWhyFirst_oth,DisplacementMigrationHosts_module/DisplacementBasic_submodule/HHDisplWhySec/100,DisplacementMigrationHosts_module/DisplacementBasic_submodule/HHDisplWhySec/200,DisplacementMigrationHosts_module/DisplacementBasic_submodule/HHDisplWhySec/300,DisplacementMigrationHosts_module/DisplacementBasic_submodule/HHDisplWhySec/400,DisplacementMigrationHosts_module/DisplacementBasic_submodule/HHDisplWhySec/500,DisplacementMigrationHosts_module/DisplacementBasic_submodule/HHDisplWhySec/600,DisplacementMigrationHosts_module/DisplacementBasic_submodule/HHDisplWhySec/700,DisplacementMigrationHosts_module/DisplacementBasic_submodule/HHDisplWhySec/800,DisplacementMigrationHosts_module/DisplacementBasic_submodule/HHDisplWhySec/900,DisplacementMigrationHosts_module/DisplacementBasic_submodule/HHDisplWhySec/999,DisplacementMigrationHosts_module/DisplacementBasic_submodule/HHDisplWhySec/1100,DisplacementMigrationHosts_module/DisplacementBasic_submodule/HHDisplWhySec/1200,DisplacementMigrationHosts_module/DisplacementBasic_submodule/HHDisplWhySec_oth,DisplacementMigrationHosts_module/DisplacementBasic_submodule/HHDisplChoice,PerceivedNeeds_module/PeceivedNeeds_submodule/HHPercNeedWater,PerceivedNeeds_module/PeceivedNeeds_submodule/HHPercNeedFood,PerceivedNeeds_module/PeceivedNeeds_submodule/HHPercNeedHousing,PerceivedNeeds_module/PeceivedNeeds_submodule/HHPercNeedToilet,PerceivedNeeds_module/PeceivedNeeds_submodule/HHPercNeedHygiene,PerceivedNeeds_module/PeceivedNeeds_submodule/HHPercNeedClothTex,PerceivedNeeds_module/PeceivedNeeds_submodule/HHPercNeedLivelihood,PerceivedNeeds_module/PeceivedNeeds_submodule/HHPercNeedDisabIll,PerceivedNeeds_module/PeceivedNeeds_submodule/HHPercNeedHealth,PerceivedNeeds_module/PeceivedNeeds_submodule/HHPercNeedSafety,PerceivedNeeds_module/PeceivedNeeds_submodule/HHPercNeedEducation,PerceivedNeeds_module/PeceivedNeeds_submodule/HHPercNeedCaregive,PerceivedNeeds_module/PeceivedNeeds_submodule/HHPercNeedInfo,PerceivedNeeds_module/PeceivedNeeds_submodule/HHPercNeedAsstInfo,PerceivedNeeds_module/PeceivedNeeds_submodule/CMPercNeedJustice,PerceivedNeeds_module/PeceivedNeeds_submodule/CMPercNeedGBViolence,PerceivedNeeds_module/PeceivedNeeds_submodule/CMPercNeedSubstAbuse,PerceivedNeeds_module/PeceivedNeeds_submodule/CMPercNeedMentalCare,PerceivedNeeds_module/PeceivedNeeds_submodule/CMPercNeedCaregiving,PerceivedNeeds_module/PeceivedNeeds_submodule/CMPercNeedRFirst,PerceivedNeeds_module/PeceivedNeeds_submodule/CMPercNeedRSec,PerceivedNeeds_module/PeceivedNeeds_submodule/CMPercNeedRThird,choc_module/choc,choc_module/chocSubits/1,choc_module/chocSubits/2,choc_module/chocSubits/3,choc_module/chocSubits/4,choc_module/chocSubits/5,choc_module/chocSubits/6,choc_module/chocSubits/7,choc_module/chocSubits/8,choc_module/chocSubits/9,choc_module/chocSubits/10,choc_module/chocSubits/11,choc_module/chocSubits/12,choc_module/chocSubits/13,choc_module/chocSubits/14,choc_module/chocSubits/15,choc_module/chocSubits/16,choc_module/chocSubits/17,choc_module/chocSubits/18,choc_module/chocSubits/19,choc_module/chocSubits/20,choc_module/chocSubits_autre,choc_module/repeatChoc_count,choc_module/repeatChoc/0/choc_name,choc_module/repeatChoc/0/choc_label,choc_module/repeatChoc/0/chocImpact/1,choc_module/repeatChoc/0/chocImpact/2,choc_module/repeatChoc/0/chocImpact/3,choc_module/repeatChoc/0/chocImpact/4,choc_module/repeatChoc/0/chocImpactAlim,choc_module/repeatChoc/0/recupChoc,choc_module/repeatChoc/1/choc_name,choc_module/repeatChoc/1/choc_label,choc_module/repeatChoc/1/chocImpact/1,choc_module/repeatChoc/1/chocImpact/2,choc_module/repeatChoc/1/chocImpact/3,choc_module/repeatChoc/1/chocImpact/4,choc_module/repeatChoc/1/chocImpactAlim,choc_module/repeatChoc/1/recupChoc,choc_module/repeatChoc/2/choc_name,choc_module/repeatChoc/2/choc_label,choc_module/repeatChoc/2/chocImpact/1,choc_module/repeatChoc/2/chocImpact/2,choc_module/repeatChoc/2/chocImpact/3,choc_module/repeatChoc/2/chocImpact/4,choc_module/repeatChoc/2/chocImpactAlim,choc_module/repeatChoc/2/recupChoc,choc_module/repeatChoc/3/choc_name,choc_module/repeatChoc/3/choc_label,choc_module/repeatChoc/3/chocImpact/1,choc_module/repeatChoc/3/chocImpact/2,choc_module/repeatChoc/3/chocImpact/3,choc_module/repeatChoc/3/chocImpact/4,choc_module/repeatChoc/3/chocImpactAlim,choc_module/repeatChoc/3/recupChoc,choc_module/repeatChoc/4/choc_name,choc_module/repeatChoc/4/choc_label,choc_module/repeatChoc/4/chocImpact/1,choc_module/repeatChoc/4/chocImpact/2,choc_module/repeatChoc/4/chocImpact/3,choc_module/repeatChoc/4/chocImpact/4,choc_module/repeatChoc/4/chocImpactAlim,choc_module/repeatChoc/4/recupChoc,choc_module/repeatChoc/5/choc_name,choc_module/repeatChoc/5/choc_label,choc_module/repeatChoc/5/chocImpact/1,choc_module/repeatChoc/5/chocImpact/2,choc_module/repeatChoc/5/chocImpact/3,choc_module/repeatChoc/5/chocImpact/4,choc_module/repeatChoc/5/chocImpactAlim,choc_module/repeatChoc/5/recupChoc,choc_module/repeatChoc/6/choc_name,choc_module/repeatChoc/6/choc_label,choc_module/repeatChoc/6/chocImpact/1,choc_module/repeatChoc/6/chocImpact/2,choc_module/repeatChoc/6/chocImpact/3,choc_module/repeatChoc/6/chocImpact/4,choc_module/repeatChoc/6/chocImpactAlim,choc_module/repeatChoc/6/recupChoc,choc_module/repeatChoc/7/choc_name,choc_module/repeatChoc/7/choc_label,choc_module/repeatChoc/7/chocImpact/1,choc_module/repeatChoc/7/chocImpact/2,choc_module/repeatChoc/7/chocImpact/3,choc_module/repeatChoc/7/chocImpact/4,choc_module/repeatChoc/7/chocImpactAlim,choc_module/repeatChoc/7/recupChoc,choc_module/repeatChoc/8/choc_name,choc_module/repeatChoc/8/choc_label,choc_module/repeatChoc/8/chocImpact/1,choc_module/repeatChoc/8/chocImpact/2,choc_module/repeatChoc/8/chocImpact/3,choc_module/repeatChoc/8/chocImpact/4,choc_module/repeatChoc/8/chocImpactAlim,choc_module/repeatChoc/8/recupChoc,choc_module/repeatChoc/9/choc_name,choc_module/repeatChoc/9/choc_label,choc_module/repeatChoc/9/chocImpact/1,choc_module/repeatChoc/9/chocImpact/2,choc_module/repeatChoc/9/chocImpact/3,choc_module/repeatChoc/9/chocImpact/4,choc_module/repeatChoc/9/chocImpactAlim,choc_module/repeatChoc/9/recupChoc,Assistance_module/AssistanceENA_submodule/HHAsstWFPCBTRecYN,Assistance_module/AssistanceENA_submodule/HHAsstWFPCBTRecTot,Assistance_module/AssistanceENA_submodule/HHAsstUNNGOCBTRecYN,Assistance_module/AssistanceENA_submodule/HHAsstUNNGOCBTRecName/100,Assistance_module/AssistanceENA_submodule/HHAsstUNNGOCBTRecName/101,Assistance_module/AssistanceENA_submodule/HHAsstUNNGOCBTRecName/102,Assistance_module/AssistanceENA_submodule/HHAsstUNNGOCBTRecName/200,Assistance_module/AssistanceENA_submodule/HHAsstUNNGOCBTRecName/1,Assistance_module/AssistanceENA_submodule/HHAsstUNNGOCBTRecName/2,Assistance_module/AssistanceENA_submodule/HHAsstUNNGOCBTRecName/3,Assistance_module/AssistanceENA_submodule/HHAsstUNNGOCBTRecTot,Assistance_module/AssistanceENA_submodule/HHAsstOthCBTRecYN,Assistance_module/AssistanceENA_submodule/HHAsstOthCBTRecName/300,Assistance_module/AssistanceENA_submodule/HHAsstOthCBTRecName/301,Assistance_module/AssistanceENA_submodule/HHAsstOthCBTRecName/302,Assistance_module/AssistanceENA_submodule/HHAsstOthCBTRecName/303,Assistance_module/AssistanceENA_submodule/HHAsstOthCBTRecName/304,Assistance_module/AssistanceENA_submodule/HHAsstOthCBTRecName/305,Assistance_module/AssistanceENA_submodule/HHAsstOthCBTRecName/999,Assistance_module/AssistanceENA_submodule/HHAsstOthCBTRecName_oth,Assistance_module/AssistanceENA_submodule/HHAsstOthCBTRecTot,Assistance_module/AssistanceENA_submodule/HHAsstCBTCShare,Assistance_module/AssistanceENA_submodule/RIMA_Proposition1,Assistance_module/AssistanceENA_submodule/RIMA_Proposition2,Assets_module/WealthSimpleHouseholdItems_submodule/HHAssetMattress,Assets_module/WealthSimpleHouseholdItems_submodule/HHAssetMat,Assets_module/WealthSimpleHouseholdItems_submodule/HHAssetMsqtNet,Assets_module/WealthSimpleHouseholdItems_submodule/HHAssetBlanket,Assets_module/WealthSimpleHouseholdItems_submodule/HHAssetTable,Assets_module/WealthSimpleHouseholdItems_submodule/HHAssetCabinet,Assets_module/WealthSimpleHouseholdItems_submodule/HHAssetChair,Assets_module/WealthSimpleHouseholdItems_submodule/HHAssetSofa,Assets_module/WealthSimpleHouseholdItems_submodule/HHAssetLampP,Assets_module/WealthSimpleHouseholdItems_submodule/HHAssetLampT,Assets_module/WealthSimpleHouseholdItems_submodule/HHAssetGLamp,Assets_module/WealthSimpleHouseholdItems_submodule/HHAssetELamp,Assets_module/WealthSimpleHouseholdItems_submodule/HHAssetGasStove,Assets_module/WealthSimpleHouseholdItems_submodule/HHAssetWaterTank,Assets_module/WealthBasicElecItems_submodule/HHAssetRadio,Assets_module/WealthBasicElecItems_submodule/HHAssetCellphone,Assets_module/WealthBasicElecItems_submodule/HHAssetSmartphone,Assets_module/WealthAdvElecItems_submodule/HHAssetTV,Assets_module/WealthAdvElecItems_submodule/HHAssetSewing,Assets_module/WealthAdvElecItems_submodule/HHAssetEGenerator,Assets_module/WealthAdvElecItems_submodule/HHAssetSolar,Assets_module/WealthAdvElecItems_submodule/HHAssetWfilter,Assets_module/WealthAdvElecItems_submodule/HHAssetWpump,Assets_module/WealthAgriAssets_submodule/HHAssetLandProd,Assets_module/WealthAgriAssets_submodule/HHAssetLandLend,Assets_module/WealthAgriAssets_submodule/HHAssetMill,Assets_module/WealthAgriAssets_submodule/HHAssetBrick,Assets_module/WealthAgriAssets_submodule/HHAssetAx,Assets_module/WealthAgriAssets_submodule/HHAssetShovel,Assets_module/WealthTransportAssets_submodule/HHAssetMoto,Assets_module/WealthTransportAssets_submodule/HHAssetBike,Assets_module/WealthTransportAssets_submodule/HHAssetTricyvle,Assets_module/WealthTransportAssets_submodule/HHAssetvehicule,Assets_module/WealthTransportAssets_submodule/HHAssetpirogues,Assets_module/WealthTransportAssets_submodule/HHAssetHorsBords,Assets_module/Agriculture_submodule/possessionTerre,Assets_module/Agriculture_submodule/possessionTerreNo,Assets_module/Agriculture_submodule/possessionTerreNo_autre,Assets_module/Agriculture_submodule/modePossessionTerre,Assets_module/Agriculture_submodule/modePossessionTerre_autre,Assets_module/Agriculture_submodule/possessionTerreSup,Assets_module/Agriculture_submodule/saisonAgricole,Assets_module/Agriculture_submodule/embavureSuperficie,Assets_module/Agriculture_submodule/raisonNoSaison,Assets_module/Agriculture_submodule/raisonNoSaison_autre,Assets_module/Agriculture_submodule/raisonNoEmblavure,Assets_module/Agriculture_submodule/raisonNoEmblavure_autre,Assets_module/Agriculture_submodule/AC15,Assets_module/Agriculture_submodule/AC16,Assets_module/Agriculture_submodule/AC8,Assets_module/Agriculture_submodule/AC9,Assets_module/Agriculture_submodule/AC10,Assets_module/Agriculture_submodule/AC11,Assets_module/Agriculture_submodule/AC12,Assets_module/Agriculture_submodule/AC13,speculationCulturesMenages/speculationCultive/1,speculationCulturesMenages/speculationCultive/2,speculationCulturesMenages/speculationCultive/3,speculationCulturesMenages/speculationCultive/4,speculationCulturesMenages/speculationCultive/5,speculationCulturesMenages/speculationCultive/6,speculationCulturesMenages/speculationCultive/7,speculationCulturesMenages/speculationCultive/8,speculationCulturesMenages/speculationCultive/9,speculationCulturesMenages/speculationCultive/10,speculationCulturesMenages/speculationCultive/11,speculationCulturesMenages/speculationCultive/12,speculationCulturesMenages/speculationCultive/13,speculationCulturesMenages/speculationCultive/14,speculationCulturesMenages/speculationCultive/15,speculationCulturesMenages/speculationCultive/16,speculationCulturesMenages/speculationCultive/17,speculationCulturesMenages/speculationCultive/18,speculationCulturesMenages/speculationCultive/20,speculationCulturesMenages/speculationCultive/21,speculationCulturesMenages/MAIS/raisonCulture_1,speculationCulturesMenages/MAIS/raisonCulture1_autre,speculationCulturesMenages/MAIS/sourceSemence_1,speculationCulturesMenages/MAIS/tempsRecolte_1,speculationCulturesMenages/MAIS/comeneSaison2019_1,speculationCulturesMenages/MAIS/dureeRecolte_1,speculationCulturesMenages/MAIS/AST_Mais,speculationCulturesMenages/MAIS/quantiteStock_1,speculationCulturesMenages/MAIS/contrainteCulture_1,speculationCulturesMenages/MAIS/transfoCultureVente_1,speculationCulturesMenages/MAIS/contrainteTransfoVente_1/1,speculationCulturesMenages/MAIS/contrainteTransfoVente_1/2,speculationCulturesMenages/MAIS/contrainteTransfoVente_1/3,speculationCulturesMenages/MAIS/contrainteTransfoVente_1/4,speculationCulturesMenages/MAIS/contrainteTransfoVente_1/5,speculationCulturesMenages/MAIS/contrainteTransfoVente_1/6,speculationCulturesMenages/MAIS/contrainteTransfoVente_1/7,speculationCulturesMenages/RIZ/raisonCulture_2,speculationCulturesMenages/RIZ/raisonCulture2_autre,speculationCulturesMenages/RIZ/sourceSemence_2,speculationCulturesMenages/RIZ/tempsRecolte_2,speculationCulturesMenages/RIZ/comeneSaison2019_2,speculationCulturesMenages/RIZ/dureeRecolte_2,speculationCulturesMenages/RIZ/AST_Riz,speculationCulturesMenages/RIZ/quantiteStock_2,speculationCulturesMenages/RIZ/contrainteCulture_2,speculationCulturesMenages/BANANE_DOUCE/raisonCulture_3,speculationCulturesMenages/BANANE_DOUCE/raisonCulture3_autre,speculationCulturesMenages/BANANE_DOUCE/sourceSemence_3,speculationCulturesMenages/BANANE_DOUCE/tempsRecolte_3,speculationCulturesMenages/BANANE_DOUCE/comeneSaison2019_3,speculationCulturesMenages/BANANE_DOUCE/dureeRecolte_3,speculationCulturesMenages/BANANE_DOUCE/AST_BANANE_DOUCE,speculationCulturesMenages/BANANE_DOUCE/quantiteStock_3,speculationCulturesMenages/BANANE_DOUCE/contrainteCulture_3,speculationCulturesMenages/HARICOT_VERT/raisonCulture_4,speculationCulturesMenages/HARICOT_VERT/raisonCulture4_autre,speculationCulturesMenages/HARICOT_VERT/sourceSemence_4,speculationCulturesMenages/HARICOT_VERT/tempsRecolte_4,speculationCulturesMenages/HARICOT_VERT/comeneSaison2019_4,speculationCulturesMenages/HARICOT_VERT/dureeRecolte_4,speculationCulturesMenages/HARICOT_VERT/AST_HARICOT_VERT,speculationCulturesMenages/HARICOT_VERT/quantiteStock_4,speculationCulturesMenages/HARICOT_VERT/contrainteCulture_4,speculationCulturesMenages/HARICOT/raisonCulture_5,speculationCulturesMenages/HARICOT/raisonCulture5_autre,speculationCulturesMenages/HARICOT/sourceSemence_5,speculationCulturesMenages/HARICOT/tempsRecolte_5,speculationCulturesMenages/HARICOT/comeneSaison2019_5,speculationCulturesMenages/HARICOT/dureeRecolte_5,speculationCulturesMenages/HARICOT/AST_Haricot,speculationCulturesMenages/HARICOT/quantiteStock_5,speculationCulturesMenages/HARICOT/contrainteCulture_5,speculationCulturesMenages/CACAO/raisonCulture_6,speculationCulturesMenages/CACAO/raisonCulture6_autre,speculationCulturesMenages/CACAO/sourceSemence_6,speculationCulturesMenages/CACAO/tempsRecolte_6,speculationCulturesMenages/CACAO/comeneSaison2019_6,speculationCulturesMenages/CACAO/dureeRecolte_6,speculationCulturesMenages/CACAO/AST_CACAO,speculationCulturesMenages/CACAO/quantiteStock_6,speculationCulturesMenages/CACAO/contrainteCulture_6,speculationCulturesMenages/ARACHIDE/raisonCulture_7,speculationCulturesMenages/ARACHIDE/raisonCulture7_autre,speculationCulturesMenages/ARACHIDE/sourceSemence_7,speculationCulturesMenages/ARACHIDE/tempsRecolte_7,speculationCulturesMenages/ARACHIDE/comeneSaison2019_7,speculationCulturesMenages/ARACHIDE/dureeRecolte_7,speculationCulturesMenages/ARACHIDE/AST_Arachide,speculationCulturesMenages/ARACHIDE/quantiteStock_7,speculationCulturesMenages/ARACHIDE/contrainteCulture_7,speculationCulturesMenages/SOJA/raisonCulture_8,speculationCulturesMenages/SOJA/raisonCulture8_autre,speculationCulturesMenages/SOJA/sourceSemence_8,speculationCulturesMenages/SOJA/tempsRecolte_8,speculationCulturesMenages/SOJA/comeneSaison2019_8,speculationCulturesMenages/SOJA/dureeRecolte_8,speculationCulturesMenages/SOJA/AST_Soja,speculationCulturesMenages/SOJA/quantiteStock_8,speculationCulturesMenages/SOJA/contrainteCulture_8,speculationCulturesMenages/ANGOLE/raisonCulture_9,speculationCulturesMenages/ANGOLE/raisonCulture9_autre,speculationCulturesMenages/ANGOLE/sourceSemence_9,speculationCulturesMenages/ANGOLE/tempsRecolte_9,speculationCulturesMenages/ANGOLE/comeneSaison2019_9,speculationCulturesMenages/ANGOLE/dureeRecolte_9,speculationCulturesMenages/ANGOLE/AST_POIS_ANGOLE,speculationCulturesMenages/ANGOLE/quantiteStock_9,speculationCulturesMenages/ANGOLE/contrainteCulture_9,speculationCulturesMenages/PATATE_DOUCE/raisonCulture_10,speculationCulturesMenages/PATATE_DOUCE/raisonCulture10_autre,speculationCulturesMenages/PATATE_DOUCE/sourceSemence_10,speculationCulturesMenages/PATATE_DOUCE/tempsRecolte_10,speculationCulturesMenages/PATATE_DOUCE/comeneSaison2019_10,speculationCulturesMenages/PATATE_DOUCE/dureeRecolte_10,speculationCulturesMenages/PATATE_DOUCE/AST_PATATE_DOUCE,speculationCulturesMenages/PATATE_DOUCE/quantiteStock_10,speculationCulturesMenages/PATATE_DOUCE/contrainteCulture_10,speculationCulturesMenages/POMME_DE_TERRE/raisonCulture_11,speculationCulturesMenages/POMME_DE_TERRE/raisonCulture11_autre,speculationCulturesMenages/POMME_DE_TERRE/sourceSemence_11,speculationCulturesMenages/POMME_DE_TERRE/tempsRecolte_11,speculationCulturesMenages/POMME_DE_TERRE/comeneSaison2019_11,speculationCulturesMenages/POMME_DE_TERRE/dureeRecolte_11,speculationCulturesMenages/POMME_DE_TERRE/AST_POMME_TERRE,speculationCulturesMenages/POMME_DE_TERRE/quantiteStock_11,speculationCulturesMenages/POMME_DE_TERRE/contrainteCulture_11,speculationCulturesMenages/TAROT/raisonCulture_12,speculationCulturesMenages/TAROT/raisonCulture12_autre,speculationCulturesMenages/TAROT/sourceSemence_12,speculationCulturesMenages/TAROT/tempsRecolte_12,speculationCulturesMenages/TAROT/comeneSaison2019_12,speculationCulturesMenages/TAROT/dureeRecolte_12,speculationCulturesMenages/TAROT/AST_TARO,speculationCulturesMenages/TAROT/quantiteStock_12,speculationCulturesMenages/TAROT/contrainteCulture_12,speculationCulturesMenages/MANIOC/raisonCulture_13,speculationCulturesMenages/MANIOC/raisonCulture13_autre,speculationCulturesMenages/MANIOC/sourceSemence_13,speculationCulturesMenages/MANIOC/tempsRecolte_13,speculationCulturesMenages/MANIOC/comeneSaison2019_13,speculationCulturesMenages/MANIOC/dureeRecolte_13,speculationCulturesMenages/MANIOC/AST_MANIOC,speculationCulturesMenages/MANIOC/quantiteStock_13,speculationCulturesMenages/MANIOC/contrainteCulture_13,speculationCulturesMenages/BANANE_PLANTAIN/raisonCulture_14,speculationCulturesMenages/BANANE_PLANTAIN/raisonCulture14_autre,speculationCulturesMenages/BANANE_PLANTAIN/sourceSemence_14,speculationCulturesMenages/BANANE_PLANTAIN/tempsRecolte_14,speculationCulturesMenages/BANANE_PLANTAIN/comeneSaison2019_14,speculationCulturesMenages/BANANE_PLANTAIN/dureeRecolte_14,speculationCulturesMenages/BANANE_PLANTAIN/AST_BANANE_PLANTAIN,speculationCulturesMenages/BANANE_PLANTAIN/quantiteStock_14,speculationCulturesMenages/BANANE_PLANTAIN/contrainteCulture_14,speculationCulturesMenages/IGNAME/raisonCulture_15,speculationCulturesMenages/IGNAME/raisonCulture15_autre,speculationCulturesMenages/IGNAME/sourceSemence_15,speculationCulturesMenages/IGNAME/tempsRecolte_15,speculationCulturesMenages/IGNAME/comeneSaison2019_15,speculationCulturesMenages/IGNAME/dureeRecolte_15,speculationCulturesMenages/IGNAME/AST_IGNAME,speculationCulturesMenages/IGNAME/quantiteStock_15,speculationCulturesMenages/IGNAME/contrainteCulture_15,speculationCulturesMenages/CULTURES_MARAICHERES/raisonCulture_16,speculationCulturesMenages/CULTURES_MARAICHERES/raisonCulture16_autre,speculationCulturesMenages/CULTURES_MARAICHERES/sourceSemence_16,speculationCulturesMenages/CULTURES_MARAICHERES/tempsRecolte_16,speculationCulturesMenages/CULTURES_MARAICHERES/comeneSaison2019_16,speculationCulturesMenages/CULTURES_MARAICHERES/dureeRecolte_16,speculationCulturesMenages/CULTURES_MARAICHERES/AST_CULTURES_MARAICHERES,speculationCulturesMenages/CULTURES_MARAICHERES/quantiteStock_16,speculationCulturesMenages/CULTURES_MARAICHERES/contrainteCulture_16,speculationCulturesMenages/PALMIER_A_HUILE/raisonCulture_17,speculationCulturesMenages/PALMIER_A_HUILE/raisonCulture17_autre,speculationCulturesMenages/PALMIER_A_HUILE/sourceSemence_17,speculationCulturesMenages/PALMIER_A_HUILE/tempsRecolte_17,speculationCulturesMenages/PALMIER_A_HUILE/comeneSaison2019_17,speculationCulturesMenages/PALMIER_A_HUILE/dureeRecolte_17,speculationCulturesMenages/PALMIER_A_HUILE/AST_PALMIER_A_HUILE,speculationCulturesMenages/PALMIER_A_HUILE/quantiteStock_17,speculationCulturesMenages/PALMIER_A_HUILE/contrainteCulture_17,speculationCulturesMenages/CAFE_VERT/raisonCulture_18,speculationCulturesMenages/CAFE_VERT/raisonCulture18_autre,speculationCulturesMenages/CAFE_VERT/sourceSemence_18,speculationCulturesMenages/CAFE_VERT/tempsRecolte_18,speculationCulturesMenages/CAFE_VERT/comeneSaison2019_18,speculationCulturesMenages/CAFE_VERT/dureeRecolte_18,speculationCulturesMenages/CAFE_VERT/AST_CAFE,speculationCulturesMenages/CAFE_VERT/quantiteStock_18,speculationCulturesMenages/CAFE_VERT/contrainteCulture_18,speculationCulturesMenages/FRUITS/raisonCulture_20,speculationCulturesMenages/FRUITS/raisonCulture20_autre,speculationCulturesMenages/FRUITS/sourceSemence_20,speculationCulturesMenages/FRUITS/tempsRecolte_20,speculationCulturesMenages/FRUITS/comeneSaison2019_20,speculationCulturesMenages/FRUITS/dureeRecolte_20,speculationCulturesMenages/FRUITS/AST_FRUITS,speculationCulturesMenages/FRUITS/quantiteStock_20,speculationCulturesMenages/FRUITS/contrainteCulture_20,speculationCulturesMenages/MIEL/raisonCulture_21,speculationCulturesMenages/MIEL/raisonCulture21_autre,speculationCulturesMenages/MIEL/sourceSemence_21,speculationCulturesMenages/MIEL/tempsRecolte_21,speculationCulturesMenages/MIEL/comeneSaison2019_21,speculationCulturesMenages/MIEL/dureeRecolte_21,speculationCulturesMenages/MIEL/AST_MIEL,speculationCulturesMenages/MIEL/quantiteStock_21,speculationCulturesMenages/MIEL/contrainteCulture_21,Animal_possession_module/betail,Animal_possession_module/AC19,Animal_possession_module/especes/betailElevage/1,Animal_possession_module/especes/betailElevage/2,Animal_possession_module/especes/betailElevage/3,Animal_possession_module/especes/betailElevage/4,Animal_possession_module/especes/betailElevage/5,Animal_possession_module/especes/betailElevage/6,Animal_possession_module/especes/BOVINS/nbrBetail_1,Animal_possession_module/especes/BOVINS/perteBetails_1,Animal_possession_module/especes/BOVINS/causePerte_1/1,Animal_possession_module/especes/BOVINS/causePerte_1/2,Animal_possession_module/especes/BOVINS/causePerte_1/3,Animal_possession_module/especes/BOVINS/perteSaisonier_1,Animal_possession_module/especes/PORCINS/nbrBetail_2,Animal_possession_module/especes/PORCINS/perteBetails_2,Animal_possession_module/especes/PORCINS/causePerte_2/1,Animal_possession_module/especes/PORCINS/causePerte_2/2,Animal_possession_module/especes/PORCINS/causePerte_2/3,Animal_possession_module/especes/PORCINS/perteSaisonier_2,Animal_possession_module/especes/OVINS/nbrBetail_3,Animal_possession_module/especes/OVINS/perteBetails_3,Animal_possession_module/especes/OVINS/causePerte_3/1,Animal_possession_module/especes/OVINS/causePerte_3/2,Animal_possession_module/especes/OVINS/causePerte_3/3,Animal_possession_module/especes/OVINS/perteSaisonier_3,Animal_possession_module/especes/CAPRINS/nbrBetail_4,Animal_possession_module/especes/CAPRINS/perteBetails_4,Animal_possession_module/especes/CAPRINS/causePerte_4/1,Animal_possession_module/especes/CAPRINS/causePerte_4/2,Animal_possession_module/especes/CAPRINS/causePerte_4/3,Animal_possession_module/especes/CAPRINS/perteSaisonier_4,Animal_possession_module/especes/VOLAILLES/nbrBetail_5,Animal_possession_module/especes/VOLAILLES/perteBetails_5,Animal_possession_module/especes/VOLAILLES/causePerte_5/1,Animal_possession_module/especes/VOLAILLES/causePerte_5/2,Animal_possession_module/especes/VOLAILLES/causePerte_5/3,Animal_possession_module/especes/VOLAILLES/perteSaisonier_5,Animal_possession_module/especes/LAPINS_COBAILLES/nbrBetail_6,Animal_possession_module/especes/LAPINS_COBAILLES/perteBetails_6,Animal_possession_module/especes/LAPINS_COBAILLES/causePerte_6/1,Animal_possession_module/especes/LAPINS_COBAILLES/causePerte_6/2,Animal_possession_module/especes/LAPINS_COBAILLES/causePerte_6/3,Animal_possession_module/especes/LAPINS_COBAILLES/perteSaisonier_6,Safety_module/SafetyBasic_submodule/MDDIHHPercSafe,Safety_module/SafetyBasic_submodule/MDDIHHUnsafeWhy,Safety_module/SafetyBasic_submodule/MDDIHHUnsafeWhy_oth,Safety_module/SafetyBasic_submodule/MDDIHHShInsec1Y,Safety_module/SafetyBasic_submodule/MDDIHHShInsecType,Safety_module/SafetyBasic_submodule/MDDIHHShInsecType_oth,commentaire,today,_id,_uuid,_submission_time,_date_modified,_tags,_notes,_version,_duration,_submitted_by,_total_media,_media_count,_media_all_received,_xform_id";
+            var csvHeader =
+                @"SvyStartTime,Technical_module/TechnicalBasic_submodule/SvyDate,Technical_module/TechnicalBasic_submodule/ID00,Technical_module/TechnicalBasic_submodule/ID01,Technical_module/TechnicalBasic_submodule/ID02,Technical_module/TechnicalBasic_submodule/ID03,Technical_module/TechnicalBasic_submodule/ID04,Technical_module/TechnicalBasic_submodule/ID05,Technical_module/TechnicalBasic_submodule/ID04LABEL,Technical_module/TechnicalBasic_submodule/ID05LABEL,Technical_module/TechnicalBasic_submodule/ID06CAL,Technical_module/TechnicalBasic_submodule/ID06,Technical_module/TechnicalBasic_submodule/ID07,Technical_module/TechnicalBasic_submodule/HHID,Technical_module/TechnicalBasic_submodule/EnuSupervisorName,Technical_module/TechnicalBasic_submodule/EnuChefEquipeName,Technical_module/TechnicalBasic_submodule/EnuSexTL,Technical_module/TechnicalBasic_submodule/EnuName,Technical_module/TechnicalBasic_submodule/EnuSex,Technical_module/RESPConsentAssesment,Demographic_module/DemographicBasic_submodule/TypeHousehold,Demographic_module/DemographicBasic_submodule/HHStatusOther,Demographic_module/DemographicBasic_submodule/HHStatus,Demographic_module/DemographicBasic_submodule/RESPAge,Demographic_module/DemographicBasic_submodule/RespSex,Demographic_module/DemographicBasic_submodule/RESPRelationHHH,Demographic_module/DemographicBasic_submodule/HHHSex,Demographic_module/DemographicBasic_submodule/HHHAge,Demographic_module/DemographicBasic_submodule/HHHStatus,Demographic_module/DemographicBasic_submodule/HHMemberInfo_submodule/HHSize,Demographic_module/DemographicBasic_submodule/Homme/HHSize01M,Demographic_module/DemographicBasic_submodule/Homme/HHSize24M,Demographic_module/DemographicBasic_submodule/Homme/HHSize511M,Demographic_module/DemographicBasic_submodule/Homme/HHSize1217M,Demographic_module/DemographicBasic_submodule/Homme/HHSize1859M,Demographic_module/DemographicBasic_submodule/Homme/HHSize60AboveM,Demographic_module/DemographicBasic_submodule/Femme/HHSize01F,Demographic_module/DemographicBasic_submodule/Femme/HHSize24F,Demographic_module/DemographicBasic_submodule/Femme/HHSize511F,Demographic_module/DemographicBasic_submodule/Femme/HHSize1217F,Demographic_module/DemographicBasic_submodule/Femme/HHSize1859F,Demographic_module/DemographicBasic_submodule/Femme/HHSize60AboveF,Demographic_module/DemographicBasic_submodule/B25,Demographic_module/DemographicBasic_submodule/B20,Demographic_module/DemographicAdditional_submodule/HHDependentNb,Demographic_module/DemographicAdditional_submodule/HHPregLactNb,Demographic_module/DemographicAdditional_submodule/HHCaregiver,Demographic_module/DemographicAdditional_submodule/HHCaregiver_oth,Demographic_module/DisabilityHHH_submodule/HHHDisabSee,Demographic_module/DisabilityHHH_submodule/HHHDisabHear,Demographic_module/DisabilityHHH_submodule/HHHDisabWalk,Demographic_module/DisabilityHHH_submodule/HHHDisabRemember,Demographic_module/DisabilityHHH_submodule/HHHDisabUnderstand,Demographic_module/DisabilityHHH_submodule/HHHDisabWash,Demographic_module/Education_submodule/AC1,Demographic_module/Education_submodule/AC2,Demographic_module/Education_submodule/AC3,Demographic_module/Education_submodule/AC4,Demographic_module/Education_submodule/AC5,Demographic_module/Education_submodule/AC6,Demographic_module/Education_submodule/Classe_suivie,Demographic_module/Education_submodule/HHNoSchool,Demographic_module/Education_submodule/HHNoSchoolAttNb,Demographic_module/Education_submodule/HHNoSchoolWhy/101,Demographic_module/Education_submodule/HHNoSchoolWhy/102,Demographic_module/Education_submodule/HHNoSchoolWhy/103,Demographic_module/Education_submodule/HHNoSchoolWhy/104,Demographic_module/Education_submodule/HHNoSchoolWhy/112,Demographic_module/Education_submodule/HHNoSchoolWhy/200,Demographic_module/Education_submodule/HHNoSchoolWhy/300,Demographic_module/Education_submodule/HHNoSchoolWhy/400,Demographic_module/Education_submodule/HHNoSchoolWhy/500,Demographic_module/Education_submodule/HHNoSchoolWhy/600,Demographic_module/Education_submodule/HHNoSchoolWhy/700,Demographic_module/Education_submodule/HHNoSchoolWhy/800,Demographic_module/Education_submodule/HHNoSchoolWhy/888,Demographic_module/Education_submodule/HHNoSchoolWhy/999,Demographic_module/Education_submodule/HHNoSchoolWhy/1000,Demographic_module/Education_submodule/HHNoSchoolWhy_oth,Demographic_module/Education_submodule/numberM612,Demographic_module/Education_submodule/numberF612,Demographic_module/Education_submodule/absentM,Demographic_module/Education_submodule/Raison1/1,Demographic_module/Education_submodule/Raison1/2,Demographic_module/Education_submodule/Raison1/3,Demographic_module/Education_submodule/Raison1/4,Demographic_module/Education_submodule/Raison1/5,Demographic_module/Education_submodule/Raison1/6,Demographic_module/Education_submodule/Raison1/7,Demographic_module/Education_submodule/Raison1/8,Demographic_module/Education_submodule/absentF,Demographic_module/Education_submodule/Raison2/1,Demographic_module/Education_submodule/Raison2/2,Demographic_module/Education_submodule/Raison2/3,Demographic_module/Education_submodule/Raison2/4,Demographic_module/Education_submodule/Raison2/5,Demographic_module/Education_submodule/Raison2/6,Demographic_module/Education_submodule/Raison2/7,Demographic_module/Education_submodule/Raison2/8,Demographic_module/Education_submodule/existeH,Demographic_module/Education_submodule/number_Abondon_M,Demographic_module/Education_submodule/Raison3/1,Demographic_module/Education_submodule/Raison3/2,Demographic_module/Education_submodule/Raison3/3,Demographic_module/Education_submodule/Raison3/4,Demographic_module/Education_submodule/Raison3/5,Demographic_module/Education_submodule/Raison3/6,Demographic_module/Education_submodule/Raison3/7,Demographic_module/Education_submodule/Raison3/8,Demographic_module/Education_submodule/existeF,Demographic_module/Education_submodule/number_Abondon_F,Demographic_module/Education_submodule/Raison4/1,Demographic_module/Education_submodule/Raison4/2,Demographic_module/Education_submodule/Raison4/3,Demographic_module/Education_submodule/Raison4/4,Demographic_module/Education_submodule/Raison4/5,Demographic_module/Education_submodule/Raison4/6,Demographic_module/Education_submodule/Raison4/7,Demographic_module/Education_submodule/Raison4/8,Demographic_module/Education_submodule/AC17,Demographic_module/Education_submodule/AC18,Health_module/HealthBasic_submodule/HHChronIllNb,Health_module/HealthBasic_submodule/HHHealthAccess,Health_module/HealthBasic_submodule/HHHealthmin,Health_module/HealthBasic_submodule/HHHealthProvider,Health_module/HealthBasic_submodule/HHHealthAccess_1M,Health_module/HealthBasic_submodule/HHHealthProvider_1M,Health_module/HealthBasic_submodule/HHHealthConstr,Health_module/HealthBasic_submodule/HHHealthConstr_oth,Health_module/HealthTreatment_submodule/MDDIHHENHealthMed_Avant,Health_module/HealthTreatment_submodule/MDDIHHENHealthMed_milieu,Health_module/HealthTreatment_submodule/MDDIHHENHealthMed,Health_module/HealthTreatment_submodule/MDDIHHENHealthMedWhy,Health_module/HealthTreatment_submodule/MDDIHHENHealthMedWhy_oth,Housing_module/Acces_market/acces_marche1,Housing_module/Acces_market/raison_acces_marche,Housing_module/Acces_market/time_min,Housing_module/HouseBasic_submodule/HHDwellType,Housing_module/HouseBasic_submodule/HHDwellType_oth,Housing_module/HouseBasic_submodule/HHTenureType,Housing_module/HouseBasic_submodule/HHTenureType_oth,Housing_module/HouseBasic_submodule/HHWallType,Housing_module/HouseBasic_submodule/HHWallType_oth,Housing_module/HouseBasic_submodule/HHRoofType,Housing_module/HouseBasic_submodule/HHRoofType_oth,Housing_module/HouseBasic_submodule/HHFloorType,Housing_module/HouseBasic_submodule/HHFloorType_oth,Housing_module/HouseBasic_submodule/HHDwellCond,Housing_module/SanitationBasic_submodule/HHENHygiene/0,Housing_module/SanitationBasic_submodule/HHENHygiene/10,Housing_module/SanitationBasic_submodule/HHENHygiene/20,Housing_module/SanitationBasic_submodule/HHENHygiene/21,Housing_module/SanitationBasic_submodule/HHENHygiene/22,Housing_module/SanitationBasic_submodule/HHENHygiene/23,Housing_module/SanitationBasic_submodule/HHENHygiene/30,Housing_module/SanitationBasic_submodule/HHENHygiene/999,Housing_module/SanitationBasic_submodule/HHENHygieneAccess,Housing_module/SanitationBasic_submodule/HHToiletType,Housing_module/SanitationBasic_submodule/HHToiletType_oth,Housing_module/SanitationBasic_submodule/HHToiletWho,Housing_module/SanitationBasic_submodule/HHToiletWho_oth,Housing_module/SanitationAdditional_submodule/HHToiletDist,Housing_module/SanitationAdditional_submodule/HHWasteOut,Housing_module/SanitationAdditional_submodule/HHWasteOut_oth,Housing_module/EnergyBasic_submodule/HHEnerCookSRC,Housing_module/EnergyBasic_submodule/HHEnerLightSRC,Housing_module/WaterSources_submodule/HHWaterSRC,Housing_module/WaterSources_submodule/HHWaterSRC_oth,Housing_module/WaterSources_submodule/HHWaterSRC_Wet,Housing_module/WaterSources_submodule/HHWaterSRC_Dry,Housing_module/WaterSources_submodule/HHWaterSRCMonth/101,Housing_module/WaterSources_submodule/HHWaterSRCMonth/102,Housing_module/WaterSources_submodule/HHWaterSRCMonth/103,Housing_module/WaterSources_submodule/HHWaterSRCMonth/104,Housing_module/WaterSources_submodule/HHWaterSRCMonth/105,Housing_module/WaterSources_submodule/HHWaterSRCMonth/106,Housing_module/WaterSources_submodule/HHWaterSRCMonth/107,Housing_module/WaterSources_submodule/HHWaterSRCMonth/108,Housing_module/WaterSources_submodule/HHWaterSRCMonth/109,Housing_module/WaterSources_submodule/HHWaterSRCMonth/110,Housing_module/WaterSources_submodule/HHWaterSRCMonth/111,Housing_module/WaterSources_submodule/HHWaterSRCMonth/112,Housing_module/WaterSources_submodule/HHWaterLoc,Housing_module/WaterSources_submodule/HHWaterLoc_oth,Housing_module/WaterSources_submodule/HHWaterSecSRC,Housing_module/WaterSources_submodule/HHWaterSecSRC_Wet,Housing_module/WaterSources_submodule/HHWaterSecSRC_Dry,Housing_module/WaterSources_submodule/HHWaterSecSRC_oth,Housing_module/WaterSources_submodule/HHWaterSecSRCMonth/101,Housing_module/WaterSources_submodule/HHWaterSecSRCMonth/102,Housing_module/WaterSources_submodule/HHWaterSecSRCMonth/103,Housing_module/WaterSources_submodule/HHWaterSecSRCMonth/104,Housing_module/WaterSources_submodule/HHWaterSecSRCMonth/105,Housing_module/WaterSources_submodule/HHWaterSecSRCMonth/106,Housing_module/WaterSources_submodule/HHWaterSecSRCMonth/107,Housing_module/WaterSources_submodule/HHWaterSecSRCMonth/108,Housing_module/WaterSources_submodule/HHWaterSecSRCMonth/109,Housing_module/WaterSources_submodule/HHWaterSecSRCMonth/110,Housing_module/WaterSources_submodule/HHWaterSecSRCMonth/111,Housing_module/WaterSources_submodule/HHWaterSecSRCMonth/112,Housing_module/WaterTreatment_submodule/HHWaterTreat,Housing_module/WaterTreatment_submodule/HHWaterTreatWhen,Housing_module/WaterTreatment_submodule/HHWaterTreatType,Housing_module/WaterTreatment_submodule/HHWaterTreatType_oth,FoodConsumption_module/FCS_FCSN_HDDS_submodule/FCSStap,FoodConsumption_module/FCS_FCSN_HDDS_submodule/FCSStap_SRf,FoodConsumption_module/FCS_FCSN_HDDS_submodule/HDDSStapCer,FoodConsumption_module/FCS_FCSN_HDDS_submodule/HDDSStapRoot,FoodConsumption_module/FCS_FCSN_HDDS_submodule/FCSPulse,FoodConsumption_module/FCS_FCSN_HDDS_submodule/FCSPulse_SRf,FoodConsumption_module/FCS_FCSN_HDDS_submodule/HDDSPulse,FoodConsumption_module/FCS_FCSN_HDDS_submodule/FCSDairy,FoodConsumption_module/FCS_FCSN_HDDS_submodule/FCSDairy_SRf,FoodConsumption_module/FCS_FCSN_HDDS_submodule/HDDSDairy,FoodConsumption_module/FCS_FCSN_HDDS_submodule/FCSPr,FoodConsumption_module/FCS_FCSN_HDDS_submodule/FCSPr_SRf,FoodConsumption_module/FCS_FCSN_HDDS_submodule/FCSNPrMeatF,FoodConsumption_module/FCS_FCSN_HDDS_submodule/HDDSPrMeatF,FoodConsumption_module/FCS_FCSN_HDDS_submodule/FCSNPrMeatO,FoodConsumption_module/FCS_FCSN_HDDS_submodule/HDDSPrMeatO,FoodConsumption_module/FCS_FCSN_HDDS_submodule/FCSNPrFish,FoodConsumption_module/FCS_FCSN_HDDS_submodule/HDDSPrFish,FoodConsumption_module/FCS_FCSN_HDDS_submodule/FCSNPrEggs,FoodConsumption_module/FCS_FCSN_HDDS_submodule/HDDSPrEggs,FoodConsumption_module/FCS_FCSN_HDDS_submodule/FCSVeg,FoodConsumption_module/FCS_FCSN_HDDS_submodule/FCSVeg_SRf,FoodConsumption_module/FCS_FCSN_HDDS_submodule/FCSNVegOrg,FoodConsumption_module/FCS_FCSN_HDDS_submodule/FCSNVegGre,FoodConsumption_module/FCS_FCSN_HDDS_submodule/HDDSVeg,FoodConsumption_module/FCS_FCSN_HDDS_submodule/FCSFruit,FoodConsumption_module/FCS_FCSN_HDDS_submodule/FCSFruit_SRf,FoodConsumption_module/FCS_FCSN_HDDS_submodule/FCSNFruiOrg,FoodConsumption_module/FCS_FCSN_HDDS_submodule/HDDSFruit,FoodConsumption_module/FCS_FCSN_HDDS_submodule/FCSFat,FoodConsumption_module/FCS_FCSN_HDDS_submodule/FCSFat_SRf,FoodConsumption_module/FCS_FCSN_HDDS_submodule/HDDSFat,FoodConsumption_module/FCS_FCSN_HDDS_submodule/FCSSugar,FoodConsumption_module/FCS_FCSN_HDDS_submodule/FCSSugar_SRf,FoodConsumption_module/FCS_FCSN_HDDS_submodule/HDDSSugar,FoodConsumption_module/FCS_FCSN_HDDS_submodule/FCSCond,FoodConsumption_module/FCS_FCSN_HDDS_submodule/FCSCond_SRf,FoodConsumption_module/FCS_FCSN_HDDS_submodule/HDDSCond,FoodConsumption_module/FIES_submodule/WORRIED,FoodConsumption_module/FIES_submodule/HEALTHY,FoodConsumption_module/FIES_submodule/FEWFOODS,FoodConsumption_module/FIES_submodule/SKIPPED,FoodConsumption_module/FIES_submodule/ATELESS,FoodConsumption_module/FIES_submodule/RUNOUT,FoodConsumption_module/FIES_submodule/HUNGRY,FoodConsumption_module/FIES_submodule/WHLDAY,FoodConsumption_module/HHS_submodule/HHSNoFood,FoodConsumption_module/HHS_submodule/HHSNoFood_FR,FoodConsumption_module/HHS_submodule/HHSBedHung,FoodConsumption_module/HHS_submodule/HHSBedHung_FR,FoodConsumption_module/HHS_submodule/HHSNotEat,FoodConsumption_module/HHS_submodule/HHSNotEat_FR,CopingStrategies_module/LhCSRural_submodule/LcsR_stress_DomAsset,CopingStrategies_module/LhCSRural_submodule/LcsR_stress_Saving,CopingStrategies_module/LhCSRural_submodule/LcsR_stress_BorrowCash,CopingStrategies_module/LhCSRural_submodule/LcsR_stress_CrdtFood,CopingStrategies_module/LhCSRural_submodule/LcsR_stress_Utilities,CopingStrategies_module/LhCSRural_submodule/LcsR_crisis_ImmCrops,CopingStrategies_module/LhCSRural_submodule/LcsR_crisis_Seed,CopingStrategies_module/LhCSRural_submodule/LcsR_crisis_ProdAssets,CopingStrategies_module/LhCSRural_submodule/Lcs_crisis_Health,CopingStrategies_module/LhCSRural_submodule/LcsR_em_ResAsset,CopingStrategies_module/LhCSRural_submodule/LcsR_em_Begged,CopingStrategies_module/LhCSRural_submodule/LcsR_em_IllegalAct,CopingStrategies_module/rCSI_submodule/rCSILessQlty,CopingStrategies_module/rCSI_submodule/rCSIBorrow,CopingStrategies_module/rCSI_submodule/rCSIMealSize,CopingStrategies_module/rCSI_submodule/rCSIMealAdult,CopingStrategies_module/rCSI_submodule/rCSIMealNb,Expenditures_module/Food_submodule/HHExpFCer_Purch_7D,Expenditures_module/Food_submodule/HHExpFCer_Purch_MN_7D,Expenditures_module/Food_submodule/HHExpFCer_GiftAid_7D,Expenditures_module/Food_submodule/HHExpFCer_GiftAid_MN_7D,Expenditures_module/Food_submodule/HHExpFCer_Own_7D,Expenditures_module/Food_submodule/HHExpFCer_Own_MN_7D,Expenditures_module/Food_submodule/HHExpFTub_Purch_7D,Expenditures_module/Food_submodule/HHExpFTub_Purch_MN_7D,Expenditures_module/Food_submodule/HHExpFTub_GiftAid_7D,Expenditures_module/Food_submodule/HHExpFTub_GiftAid_MN_7D,Expenditures_module/Food_submodule/HHExpFTub_Own_7D,Expenditures_module/Food_submodule/HHExpFTub_Own_MN_7D,Expenditures_module/Food_submodule/HHExpFTub_Purch_7D_other,Expenditures_module/Food_submodule/HHExpFTub_Purch_MN_7D2_other,Expenditures_module/Food_submodule/HHExpFTub_GiftAid_7D_other,Expenditures_module/Food_submodule/HHExpFTub_GiftAid_MN_7D_other,Expenditures_module/Food_submodule/HHExpFTub_Own_7D_other,Expenditures_module/Food_submodule/HHExpFTub_Own_MN_7D_other,Expenditures_module/Food_submodule/HHExpFPuls_Purch_7D,Expenditures_module/Food_submodule/HHExpFPuls_Purch_MN_7D,Expenditures_module/Food_submodule/HHExpFPuls_GiftAid_7D,Expenditures_module/Food_submodule/HHExpFPuls_GiftAid_MN_7D,Expenditures_module/Food_submodule/HHExpFPuls_Own_7D,Expenditures_module/Food_submodule/HHExpFPuls_Own_MN_7D,Expenditures_module/Food_submodule/HHExpFVeg_Purch_7D,Expenditures_module/Food_submodule/HHExpFVeg_Purch_MN_7D,Expenditures_module/Food_submodule/HHExpFVeg_GiftAid_7D,Expenditures_module/Food_submodule/HHExpFVeg_GiftAid_MN_7D,Expenditures_module/Food_submodule/HHExpFVeg_Own_7D,Expenditures_module/Food_submodule/HHExpFVeg_Own_MN_7D,Expenditures_module/Food_submodule/HHExpFFrt_Purch_7D,Expenditures_module/Food_submodule/HHExpFFrt_Purch_MN_7D,Expenditures_module/Food_submodule/HHExpFFrt_GiftAid_7D,Expenditures_module/Food_submodule/HHExpFFrt_GiftAid_MN_7D,Expenditures_module/Food_submodule/HHExpFFrt_Own_7D,Expenditures_module/Food_submodule/HHExpFFrt_Own_MN_7D,Expenditures_module/Food_submodule/HHExpFAnimMeat_Purch_7D,Expenditures_module/Food_submodule/HHExpFAnimMeat_Purch_MN_7D,Expenditures_module/Food_submodule/HHExpFAnimMeat_GiftAid_7D,Expenditures_module/Food_submodule/HHExpFAnimMeat_GiftAid_MN_7D,Expenditures_module/Food_submodule/HHExpFAnimMeat_Own_7D,Expenditures_module/Food_submodule/HHExpFAnimMeat_Own_MN_7D,Expenditures_module/Food_submodule/HHExpFAnimFish_Purch_7D,Expenditures_module/Food_submodule/HHExpFAnimFish_Purch_MN_7D,Expenditures_module/Food_submodule/HHExpFAnimFish_GiftAid_7D,Expenditures_module/Food_submodule/HHExpFAnimFish_GiftAid_MN_7D,Expenditures_module/Food_submodule/HHExpFAnimFish_Own_7D,Expenditures_module/Food_submodule/HHExpFAnimFish_Own_MN_7D,Expenditures_module/Food_submodule/HHExpFFats_Purch_7D,Expenditures_module/Food_submodule/HHExpFFats_Purch_MN_7D,Expenditures_module/Food_submodule/HHExpFFats_GiftAid_7D,Expenditures_module/Food_submodule/HHExpFFats_GiftAid_MN_7D,Expenditures_module/Food_submodule/HHExpFFats_Own_7D,Expenditures_module/Food_submodule/HHExpFFats_Own_MN_7D,Expenditures_module/Food_submodule/HHExpFDairy_Purch_7D,Expenditures_module/Food_submodule/HHExpFDairy_Purch_MN_7D,Expenditures_module/Food_submodule/HHExpFDairy_GiftAid_7D,Expenditures_module/Food_submodule/HHExpFDairy_GiftAid_MN_7D,Expenditures_module/Food_submodule/HHExpFDairy_Own_7D,Expenditures_module/Food_submodule/HHExpFDairy_Own_MN_7D,Expenditures_module/Food_submodule/HHExpFEgg_Purch_7D,Expenditures_module/Food_submodule/HHExpFEgg_Purch_MN_7D,Expenditures_module/Food_submodule/HHExpFEgg_GiftAid_7D,Expenditures_module/Food_submodule/HHExpFEgg_GiftAid_MN_7D,Expenditures_module/Food_submodule/HHExpFEgg_Own_7D,Expenditures_module/Food_submodule/HHExpFEgg_Own_MN_7D,Expenditures_module/Food_submodule/HHExpFSgr_Purch_7D,Expenditures_module/Food_submodule/HHExpFSgr_Purch_MN_7D,Expenditures_module/Food_submodule/HHExpFSgr_GiftAid_7D,Expenditures_module/Food_submodule/HHExpFSgr_GiftAid_MN_7D,Expenditures_module/Food_submodule/HHExpFSgr_Own_7D,Expenditures_module/Food_submodule/HHExpFSgr_Own_MN_7D,Expenditures_module/Food_submodule/HHExpFCond_Purch_7D,Expenditures_module/Food_submodule/HHExpFCond_Purch_MN_7D,Expenditures_module/Food_submodule/HHExpFCond_GiftAid_7D,Expenditures_module/Food_submodule/HHExpFCond_GiftAid_MN_7D,Expenditures_module/Food_submodule/HHExpFCond_Own_7D,Expenditures_module/Food_submodule/HHExpFCond_Own_MN_7D,Expenditures_module/Food_submodule/HHExpFBev_Purch_7D,Expenditures_module/Food_submodule/HHExpFBev_Purch_MN_7D,Expenditures_module/Food_submodule/HHExpFBev_GiftAid_7D,Expenditures_module/Food_submodule/HHExpFBev_GiftAid_MN_7D,Expenditures_module/Food_submodule/HHExpFBev_Own_7D,Expenditures_module/Food_submodule/HHExpFBev_Own_MN_7D,Expenditures_module/Food_submodule/HHExpFOut_Purch_7D,Expenditures_module/Food_submodule/HHExpFOut_Purch_MN_7D,Expenditures_module/Food_submodule/HHExpFOut_GiftAid_7D,Expenditures_module/Food_submodule/HHExpFOut_GiftAid_MN_7D,Expenditures_module/Food_submodule/HHExpFOut_Own_7D,Expenditures_module/Food_submodule/HHExpFOut_Own_MN_7D,Expenditures_module/NonFoodConsumption_submodule/HHExpNFHyg_Purch_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFHyg_Purch_MN_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFHyg_GiftAid_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFHyg_GiftAid_MN_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFTransp_Purch_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFTransp_Purch_MN_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFTransp_GiftAid_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFTransp_GiftAid_MN_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFFuel_Purch_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFFuel_Purch_MN_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFFuel_GiftAid_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFFuel_GiftAid_MN_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFWat_Purch_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFWat_Purch_MN_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFWat_GiftAid_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFWat_GiftAid_MN_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFElec_Purch_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFElec_Purch_MN_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFElec_GiftAid_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFElec_GiftAid_MN_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFEnerg_Purch_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFEnerg_Purch_MN_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFEnerg_GiftAid_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFEnerg_GiftAid_MN_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFDwelSer_Purch_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFDwelSer_Purch_MN_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFDwelSer_GiftAid_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFDwelSer_GiftAid_MN_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFPhone_Purch_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFPhone_Purch_MN_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFPhone_GiftAid_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFPhone_GiftAid_MN_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFRecr_Purch_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFRecr_Purch_MN_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFRecr_GiftAid_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFRecr_GiftAid_MN_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFAlcTobac_Purch_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFAlcTobac_Purch_MN_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFAlcTobac_GiftAid_1M,Expenditures_module/NonFoodConsumption_submodule/HHExpNFAlcTobac_GiftAid_MN_1M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFMedServ_Purch_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFMedServ_Purch_MN_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFMedServ_GiftAid_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFMedServ_GiftAid_MN_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFMedGood_Purch_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFMedGood_Purch_MN_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFMedGood_GiftAid_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFMedGood_GiftAid_MN_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFCloth_Purch_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFCloth_Purch_MN_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFCloth_GiftAid_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFCloth_GiftAid_MN_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFEduFee_Purch_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFEduFee_Purch_MN_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFEduFee_GiftAid_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFEduFee_GiftAid_MN_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFEduGood_Purch_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFEduGood_Purch_MN_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFEduGood_GiftAid_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFEduGood_GiftAid_MN_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFRent_Purch_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFRent_Purch_MN_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFRent_GiftAid_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFRent_GiftAid_MN_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFHHSoft_Purch_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFHHSoft_Purch_MN_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFHHSoft_GiftAid_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFHHSoft_GiftAid_MN_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFHHMaint_Purch_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFHHMaint_Purch_MN_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFHHMaint_GiftAid_6M,Expenditures_module/NonFoodIntermediate_submodule/HHExpNFHHMaint_GiftAid_MN_6M,Income_module/Income_submodule/HHIncNb,Income_module/Income_submodule/HHIncFirst_SRi,Income_module/Income_submodule/HHIncFirst_SRi_other,Income_module/Income_submodule/HHIncFirst_Est,Income_module/Income_submodule/HHIncFirst_Est2,Income_module/Income_submodule/HHIncFirst_Dur,Income_module/Income_submodule/HHIncFirst_PCT,Income_module/Income_submodule/HHIncFirst_LocInc,Income_module/Income_submodule/HHIncSec_SRi,Income_module/Income_submodule/HHIncSec_SRi_other,Income_module/Income_submodule/HHIncSec_Est,Income_module/Income_submodule/HHIncSec_Est2,Income_module/Income_submodule/HHIncSec_LocInc,Income_module/Income_submodule/HHIncSec_PCT,Income_module/Income_submodule/HHIncSec_Dur,Income_module/Income_submodule/HHIncThird_SRi,Income_module/Income_submodule/HHIncThird_SRi_other,Income_module/Income_submodule/HHIncThird_Est,Income_module/Income_submodule/HHIncThird_Est2,Income_module/Income_submodule/HHIncThird_LocInc,Income_module/Income_submodule/HHIncThird_PCT,Income_module/Income_submodule/HHIncThird_Dur,Income_module/Income_submodule/HHIncF_PCT,Income_module/Income_submodule/HHInc017_PCT,Income_module/Income_submodule/HHRemitt_YN_6M,Income_module/Income_submodule/HHRemitt_Est_6M,Income_module/Income_submodule/HHRemitt_LocInc_6M,Income_module/Income_submodule/HHIncConstr/1,Income_module/Income_submodule/HHIncConstr/2,Income_module/Income_submodule/HHIncConstr/3,Income_module/Income_submodule/HHIncConstr/4,Income_module/Income_submodule/HHIncConstr/5,Income_module/Income_submodule/HHIncConstr/6,Income_module/Income_submodule/HHIncConstr/7,Income_module/Income_submodule/HHIncConstr/8,Income_module/Income_submodule/HHIncConstr/9,Income_module/Income_submodule/HHIncConstr/10,Income_module/Income_submodule/HHIncConstr/999,Income_module/Income_submodule/HHIncConstr_oth,Income_module/Income_submodule/HHCreditAccess,Income_module/Income_submodule/HHCreditSRC/100,Income_module/Income_submodule/HHCreditSRC/101,Income_module/Income_submodule/HHCreditSRC/102,Income_module/Income_submodule/HHCreditSRC/200,Income_module/Income_submodule/HHCreditSRC/300,Income_module/Income_submodule/HHCreditSRC/301,Income_module/Income_submodule/HHCreditSRC/302,Income_module/Income_submodule/HHCreditSRC/400,Income_module/Income_submodule/HHCreditSRC/500,Income_module/Income_submodule/HHCreditSRC/600,Income_module/Income_submodule/HHCreditSRC/700,Income_module/Income_submodule/HHCreditSRC/999,Income_module/Income_submodule/HHCreditSRC_oth,Income_module/Income_submodule/HHBorrowYN,Income_module/Income_submodule/HHBorrowEst,Income_module/Income_submodule/HHBorrowWhy,Income_module/Income_submodule/HHBorrowWhy_oth,Income_module/Income_submodule/HHBorrowFrom,Income_module/Income_submodule/HHBorrowFrom_oth,Income_module/Income_submodule/HHDebt,Income_module/Income_submodule/HHDebt_Est,Income_module/Income_submodule/HHDebtPaidHow,Income_module/Income_submodule/HHDebtPaidHow_oth,Income_module/Income_submodule/HHDebtPaidWhen,Income_module/Income_submodule/AC14,DisplacementMigrationHosts_module/DisplacementBasic_submodule/HHDispl,DisplacementMigrationHosts_module/DisplacementBasic_submodule/HHHDisplArrive,DisplacementMigrationHosts_module/DisplacementBasic_submodule/HHDisplWhyFirst/100,DisplacementMigrationHosts_module/DisplacementBasic_submodule/HHDisplWhyFirst/200,DisplacementMigrationHosts_module/DisplacementBasic_submodule/HHDisplWhyFirst/300,DisplacementMigrationHosts_module/DisplacementBasic_submodule/HHDisplWhyFirst/400,DisplacementMigrationHosts_module/DisplacementBasic_submodule/HHDisplWhyFirst/500,DisplacementMigrationHosts_module/DisplacementBasic_submodule/HHDisplWhyFirst/600,DisplacementMigrationHosts_module/DisplacementBasic_submodule/HHDisplWhyFirst/700,DisplacementMigrationHosts_module/DisplacementBasic_submodule/HHDisplWhyFirst/800,DisplacementMigrationHosts_module/DisplacementBasic_submodule/HHDisplWhyFirst/900,DisplacementMigrationHosts_module/DisplacementBasic_submodule/HHDisplWhyFirst/999,DisplacementMigrationHosts_module/DisplacementBasic_submodule/HHDisplWhyFirst/1100,DisplacementMigrationHosts_module/DisplacementBasic_submodule/HHDisplWhyFirst/1200,DisplacementMigrationHosts_module/DisplacementBasic_submodule/HHDisplWhyFirst_oth,DisplacementMigrationHosts_module/DisplacementBasic_submodule/HHDisplWhySec/100,DisplacementMigrationHosts_module/DisplacementBasic_submodule/HHDisplWhySec/200,DisplacementMigrationHosts_module/DisplacementBasic_submodule/HHDisplWhySec/300,DisplacementMigrationHosts_module/DisplacementBasic_submodule/HHDisplWhySec/400,DisplacementMigrationHosts_module/DisplacementBasic_submodule/HHDisplWhySec/500,DisplacementMigrationHosts_module/DisplacementBasic_submodule/HHDisplWhySec/600,DisplacementMigrationHosts_module/DisplacementBasic_submodule/HHDisplWhySec/700,DisplacementMigrationHosts_module/DisplacementBasic_submodule/HHDisplWhySec/800,DisplacementMigrationHosts_module/DisplacementBasic_submodule/HHDisplWhySec/900,DisplacementMigrationHosts_module/DisplacementBasic_submodule/HHDisplWhySec/999,DisplacementMigrationHosts_module/DisplacementBasic_submodule/HHDisplWhySec/1100,DisplacementMigrationHosts_module/DisplacementBasic_submodule/HHDisplWhySec/1200,DisplacementMigrationHosts_module/DisplacementBasic_submodule/HHDisplWhySec_oth,DisplacementMigrationHosts_module/DisplacementBasic_submodule/HHDisplChoice,PerceivedNeeds_module/PeceivedNeeds_submodule/HHPercNeedWater,PerceivedNeeds_module/PeceivedNeeds_submodule/HHPercNeedFood,PerceivedNeeds_module/PeceivedNeeds_submodule/HHPercNeedHousing,PerceivedNeeds_module/PeceivedNeeds_submodule/HHPercNeedToilet,PerceivedNeeds_module/PeceivedNeeds_submodule/HHPercNeedHygiene,PerceivedNeeds_module/PeceivedNeeds_submodule/HHPercNeedClothTex,PerceivedNeeds_module/PeceivedNeeds_submodule/HHPercNeedLivelihood,PerceivedNeeds_module/PeceivedNeeds_submodule/HHPercNeedDisabIll,PerceivedNeeds_module/PeceivedNeeds_submodule/HHPercNeedHealth,PerceivedNeeds_module/PeceivedNeeds_submodule/HHPercNeedSafety,PerceivedNeeds_module/PeceivedNeeds_submodule/HHPercNeedEducation,PerceivedNeeds_module/PeceivedNeeds_submodule/HHPercNeedCaregive,PerceivedNeeds_module/PeceivedNeeds_submodule/HHPercNeedInfo,PerceivedNeeds_module/PeceivedNeeds_submodule/HHPercNeedAsstInfo,PerceivedNeeds_module/PeceivedNeeds_submodule/CMPercNeedJustice,PerceivedNeeds_module/PeceivedNeeds_submodule/CMPercNeedGBViolence,PerceivedNeeds_module/PeceivedNeeds_submodule/CMPercNeedSubstAbuse,PerceivedNeeds_module/PeceivedNeeds_submodule/CMPercNeedMentalCare,PerceivedNeeds_module/PeceivedNeeds_submodule/CMPercNeedCaregiving,PerceivedNeeds_module/PeceivedNeeds_submodule/CMPercNeedRFirst,PerceivedNeeds_module/PeceivedNeeds_submodule/CMPercNeedRSec,PerceivedNeeds_module/PeceivedNeeds_submodule/CMPercNeedRThird,choc_module/choc,choc_module/chocSubits/1,choc_module/chocSubits/2,choc_module/chocSubits/3,choc_module/chocSubits/4,choc_module/chocSubits/5,choc_module/chocSubits/6,choc_module/chocSubits/7,choc_module/chocSubits/8,choc_module/chocSubits/9,choc_module/chocSubits/10,choc_module/chocSubits/11,choc_module/chocSubits/12,choc_module/chocSubits/13,choc_module/chocSubits/14,choc_module/chocSubits/15,choc_module/chocSubits/16,choc_module/chocSubits/17,choc_module/chocSubits/18,choc_module/chocSubits/19,choc_module/chocSubits/20,choc_module/chocSubits_autre,choc_module/repeatChoc_count,choc_module/repeatChoc/0/choc_name,choc_module/repeatChoc/0/choc_label,choc_module/repeatChoc/0/chocImpact/1,choc_module/repeatChoc/0/chocImpact/2,choc_module/repeatChoc/0/chocImpact/3,choc_module/repeatChoc/0/chocImpact/4,choc_module/repeatChoc/0/chocImpactAlim,choc_module/repeatChoc/0/recupChoc,choc_module/repeatChoc/1/choc_name,choc_module/repeatChoc/1/choc_label,choc_module/repeatChoc/1/chocImpact/1,choc_module/repeatChoc/1/chocImpact/2,choc_module/repeatChoc/1/chocImpact/3,choc_module/repeatChoc/1/chocImpact/4,choc_module/repeatChoc/1/chocImpactAlim,choc_module/repeatChoc/1/recupChoc,choc_module/repeatChoc/2/choc_name,choc_module/repeatChoc/2/choc_label,choc_module/repeatChoc/2/chocImpact/1,choc_module/repeatChoc/2/chocImpact/2,choc_module/repeatChoc/2/chocImpact/3,choc_module/repeatChoc/2/chocImpact/4,choc_module/repeatChoc/2/chocImpactAlim,choc_module/repeatChoc/2/recupChoc,choc_module/repeatChoc/3/choc_name,choc_module/repeatChoc/3/choc_label,choc_module/repeatChoc/3/chocImpact/1,choc_module/repeatChoc/3/chocImpact/2,choc_module/repeatChoc/3/chocImpact/3,choc_module/repeatChoc/3/chocImpact/4,choc_module/repeatChoc/3/chocImpactAlim,choc_module/repeatChoc/3/recupChoc,choc_module/repeatChoc/4/choc_name,choc_module/repeatChoc/4/choc_label,choc_module/repeatChoc/4/chocImpact/1,choc_module/repeatChoc/4/chocImpact/2,choc_module/repeatChoc/4/chocImpact/3,choc_module/repeatChoc/4/chocImpact/4,choc_module/repeatChoc/4/chocImpactAlim,choc_module/repeatChoc/4/recupChoc,choc_module/repeatChoc/5/choc_name,choc_module/repeatChoc/5/choc_label,choc_module/repeatChoc/5/chocImpact/1,choc_module/repeatChoc/5/chocImpact/2,choc_module/repeatChoc/5/chocImpact/3,choc_module/repeatChoc/5/chocImpact/4,choc_module/repeatChoc/5/chocImpactAlim,choc_module/repeatChoc/5/recupChoc,choc_module/repeatChoc/6/choc_name,choc_module/repeatChoc/6/choc_label,choc_module/repeatChoc/6/chocImpact/1,choc_module/repeatChoc/6/chocImpact/2,choc_module/repeatChoc/6/chocImpact/3,choc_module/repeatChoc/6/chocImpact/4,choc_module/repeatChoc/6/chocImpactAlim,choc_module/repeatChoc/6/recupChoc,choc_module/repeatChoc/7/choc_name,choc_module/repeatChoc/7/choc_label,choc_module/repeatChoc/7/chocImpact/1,choc_module/repeatChoc/7/chocImpact/2,choc_module/repeatChoc/7/chocImpact/3,choc_module/repeatChoc/7/chocImpact/4,choc_module/repeatChoc/7/chocImpactAlim,choc_module/repeatChoc/7/recupChoc,choc_module/repeatChoc/8/choc_name,choc_module/repeatChoc/8/choc_label,choc_module/repeatChoc/8/chocImpact/1,choc_module/repeatChoc/8/chocImpact/2,choc_module/repeatChoc/8/chocImpact/3,choc_module/repeatChoc/8/chocImpact/4,choc_module/repeatChoc/8/chocImpactAlim,choc_module/repeatChoc/8/recupChoc,choc_module/repeatChoc/9/choc_name,choc_module/repeatChoc/9/choc_label,choc_module/repeatChoc/9/chocImpact/1,choc_module/repeatChoc/9/chocImpact/2,choc_module/repeatChoc/9/chocImpact/3,choc_module/repeatChoc/9/chocImpact/4,choc_module/repeatChoc/9/chocImpactAlim,choc_module/repeatChoc/9/recupChoc,Assistance_module/AssistanceENA_submodule/HHAsstWFPCBTRecYN,Assistance_module/AssistanceENA_submodule/HHAsstWFPCBTRecTot,Assistance_module/AssistanceENA_submodule/HHAsstUNNGOCBTRecYN,Assistance_module/AssistanceENA_submodule/HHAsstUNNGOCBTRecName/100,Assistance_module/AssistanceENA_submodule/HHAsstUNNGOCBTRecName/101,Assistance_module/AssistanceENA_submodule/HHAsstUNNGOCBTRecName/102,Assistance_module/AssistanceENA_submodule/HHAsstUNNGOCBTRecName/200,Assistance_module/AssistanceENA_submodule/HHAsstUNNGOCBTRecName/1,Assistance_module/AssistanceENA_submodule/HHAsstUNNGOCBTRecName/2,Assistance_module/AssistanceENA_submodule/HHAsstUNNGOCBTRecName/3,Assistance_module/AssistanceENA_submodule/HHAsstUNNGOCBTRecTot,Assistance_module/AssistanceENA_submodule/HHAsstOthCBTRecYN,Assistance_module/AssistanceENA_submodule/HHAsstOthCBTRecName/300,Assistance_module/AssistanceENA_submodule/HHAsstOthCBTRecName/301,Assistance_module/AssistanceENA_submodule/HHAsstOthCBTRecName/302,Assistance_module/AssistanceENA_submodule/HHAsstOthCBTRecName/303,Assistance_module/AssistanceENA_submodule/HHAsstOthCBTRecName/304,Assistance_module/AssistanceENA_submodule/HHAsstOthCBTRecName/305,Assistance_module/AssistanceENA_submodule/HHAsstOthCBTRecName/999,Assistance_module/AssistanceENA_submodule/HHAsstOthCBTRecName_oth,Assistance_module/AssistanceENA_submodule/HHAsstOthCBTRecTot,Assistance_module/AssistanceENA_submodule/HHAsstCBTCShare,Assistance_module/AssistanceENA_submodule/RIMA_Proposition1,Assistance_module/AssistanceENA_submodule/RIMA_Proposition2,Assets_module/WealthSimpleHouseholdItems_submodule/HHAssetMattress,Assets_module/WealthSimpleHouseholdItems_submodule/HHAssetMat,Assets_module/WealthSimpleHouseholdItems_submodule/HHAssetMsqtNet,Assets_module/WealthSimpleHouseholdItems_submodule/HHAssetBlanket,Assets_module/WealthSimpleHouseholdItems_submodule/HHAssetTable,Assets_module/WealthSimpleHouseholdItems_submodule/HHAssetCabinet,Assets_module/WealthSimpleHouseholdItems_submodule/HHAssetChair,Assets_module/WealthSimpleHouseholdItems_submodule/HHAssetSofa,Assets_module/WealthSimpleHouseholdItems_submodule/HHAssetLampP,Assets_module/WealthSimpleHouseholdItems_submodule/HHAssetLampT,Assets_module/WealthSimpleHouseholdItems_submodule/HHAssetGLamp,Assets_module/WealthSimpleHouseholdItems_submodule/HHAssetELamp,Assets_module/WealthSimpleHouseholdItems_submodule/HHAssetGasStove,Assets_module/WealthSimpleHouseholdItems_submodule/HHAssetWaterTank,Assets_module/WealthBasicElecItems_submodule/HHAssetRadio,Assets_module/WealthBasicElecItems_submodule/HHAssetCellphone,Assets_module/WealthBasicElecItems_submodule/HHAssetSmartphone,Assets_module/WealthAdvElecItems_submodule/HHAssetTV,Assets_module/WealthAdvElecItems_submodule/HHAssetSewing,Assets_module/WealthAdvElecItems_submodule/HHAssetEGenerator,Assets_module/WealthAdvElecItems_submodule/HHAssetSolar,Assets_module/WealthAdvElecItems_submodule/HHAssetWfilter,Assets_module/WealthAdvElecItems_submodule/HHAssetWpump,Assets_module/WealthAgriAssets_submodule/HHAssetLandProd,Assets_module/WealthAgriAssets_submodule/HHAssetLandLend,Assets_module/WealthAgriAssets_submodule/HHAssetMill,Assets_module/WealthAgriAssets_submodule/HHAssetBrick,Assets_module/WealthAgriAssets_submodule/HHAssetAx,Assets_module/WealthAgriAssets_submodule/HHAssetShovel,Assets_module/WealthTransportAssets_submodule/HHAssetMoto,Assets_module/WealthTransportAssets_submodule/HHAssetBike,Assets_module/WealthTransportAssets_submodule/HHAssetTricyvle,Assets_module/WealthTransportAssets_submodule/HHAssetvehicule,Assets_module/WealthTransportAssets_submodule/HHAssetpirogues,Assets_module/WealthTransportAssets_submodule/HHAssetHorsBords,Assets_module/Agriculture_submodule/possessionTerre,Assets_module/Agriculture_submodule/possessionTerreNo,Assets_module/Agriculture_submodule/possessionTerreNo_autre,Assets_module/Agriculture_submodule/modePossessionTerre,Assets_module/Agriculture_submodule/modePossessionTerre_autre,Assets_module/Agriculture_submodule/possessionTerreSup,Assets_module/Agriculture_submodule/saisonAgricole,Assets_module/Agriculture_submodule/embavureSuperficie,Assets_module/Agriculture_submodule/raisonNoSaison,Assets_module/Agriculture_submodule/raisonNoSaison_autre,Assets_module/Agriculture_submodule/raisonNoEmblavure,Assets_module/Agriculture_submodule/raisonNoEmblavure_autre,Assets_module/Agriculture_submodule/AC15,Assets_module/Agriculture_submodule/AC16,Assets_module/Agriculture_submodule/AC8,Assets_module/Agriculture_submodule/AC9,Assets_module/Agriculture_submodule/AC10,Assets_module/Agriculture_submodule/AC11,Assets_module/Agriculture_submodule/AC12,Assets_module/Agriculture_submodule/AC13,speculationCulturesMenages/speculationCultive/1,speculationCulturesMenages/speculationCultive/2,speculationCulturesMenages/speculationCultive/3,speculationCulturesMenages/speculationCultive/4,speculationCulturesMenages/speculationCultive/5,speculationCulturesMenages/speculationCultive/6,speculationCulturesMenages/speculationCultive/7,speculationCulturesMenages/speculationCultive/8,speculationCulturesMenages/speculationCultive/9,speculationCulturesMenages/speculationCultive/10,speculationCulturesMenages/speculationCultive/11,speculationCulturesMenages/speculationCultive/12,speculationCulturesMenages/speculationCultive/13,speculationCulturesMenages/speculationCultive/14,speculationCulturesMenages/speculationCultive/15,speculationCulturesMenages/speculationCultive/16,speculationCulturesMenages/speculationCultive/17,speculationCulturesMenages/speculationCultive/18,speculationCulturesMenages/speculationCultive/20,speculationCulturesMenages/speculationCultive/21,speculationCulturesMenages/MAIS/raisonCulture_1,speculationCulturesMenages/MAIS/raisonCulture1_autre,speculationCulturesMenages/MAIS/sourceSemence_1,speculationCulturesMenages/MAIS/tempsRecolte_1,speculationCulturesMenages/MAIS/comeneSaison2019_1,speculationCulturesMenages/MAIS/dureeRecolte_1,speculationCulturesMenages/MAIS/AST_Mais,speculationCulturesMenages/MAIS/quantiteStock_1,speculationCulturesMenages/MAIS/contrainteCulture_1,speculationCulturesMenages/MAIS/transfoCultureVente_1,speculationCulturesMenages/MAIS/contrainteTransfoVente_1/1,speculationCulturesMenages/MAIS/contrainteTransfoVente_1/2,speculationCulturesMenages/MAIS/contrainteTransfoVente_1/3,speculationCulturesMenages/MAIS/contrainteTransfoVente_1/4,speculationCulturesMenages/MAIS/contrainteTransfoVente_1/5,speculationCulturesMenages/MAIS/contrainteTransfoVente_1/6,speculationCulturesMenages/MAIS/contrainteTransfoVente_1/7,speculationCulturesMenages/RIZ/raisonCulture_2,speculationCulturesMenages/RIZ/raisonCulture2_autre,speculationCulturesMenages/RIZ/sourceSemence_2,speculationCulturesMenages/RIZ/tempsRecolte_2,speculationCulturesMenages/RIZ/comeneSaison2019_2,speculationCulturesMenages/RIZ/dureeRecolte_2,speculationCulturesMenages/RIZ/AST_Riz,speculationCulturesMenages/RIZ/quantiteStock_2,speculationCulturesMenages/RIZ/contrainteCulture_2,speculationCulturesMenages/BANANE_DOUCE/raisonCulture_3,speculationCulturesMenages/BANANE_DOUCE/raisonCulture3_autre,speculationCulturesMenages/BANANE_DOUCE/sourceSemence_3,speculationCulturesMenages/BANANE_DOUCE/tempsRecolte_3,speculationCulturesMenages/BANANE_DOUCE/comeneSaison2019_3,speculationCulturesMenages/BANANE_DOUCE/dureeRecolte_3,speculationCulturesMenages/BANANE_DOUCE/AST_BANANE_DOUCE,speculationCulturesMenages/BANANE_DOUCE/quantiteStock_3,speculationCulturesMenages/BANANE_DOUCE/contrainteCulture_3,speculationCulturesMenages/HARICOT_VERT/raisonCulture_4,speculationCulturesMenages/HARICOT_VERT/raisonCulture4_autre,speculationCulturesMenages/HARICOT_VERT/sourceSemence_4,speculationCulturesMenages/HARICOT_VERT/tempsRecolte_4,speculationCulturesMenages/HARICOT_VERT/comeneSaison2019_4,speculationCulturesMenages/HARICOT_VERT/dureeRecolte_4,speculationCulturesMenages/HARICOT_VERT/AST_HARICOT_VERT,speculationCulturesMenages/HARICOT_VERT/quantiteStock_4,speculationCulturesMenages/HARICOT_VERT/contrainteCulture_4,speculationCulturesMenages/HARICOT/raisonCulture_5,speculationCulturesMenages/HARICOT/raisonCulture5_autre,speculationCulturesMenages/HARICOT/sourceSemence_5,speculationCulturesMenages/HARICOT/tempsRecolte_5,speculationCulturesMenages/HARICOT/comeneSaison2019_5,speculationCulturesMenages/HARICOT/dureeRecolte_5,speculationCulturesMenages/HARICOT/AST_Haricot,speculationCulturesMenages/HARICOT/quantiteStock_5,speculationCulturesMenages/HARICOT/contrainteCulture_5,speculationCulturesMenages/CACAO/raisonCulture_6,speculationCulturesMenages/CACAO/raisonCulture6_autre,speculationCulturesMenages/CACAO/sourceSemence_6,speculationCulturesMenages/CACAO/tempsRecolte_6,speculationCulturesMenages/CACAO/comeneSaison2019_6,speculationCulturesMenages/CACAO/dureeRecolte_6,speculationCulturesMenages/CACAO/AST_CACAO,speculationCulturesMenages/CACAO/quantiteStock_6,speculationCulturesMenages/CACAO/contrainteCulture_6,speculationCulturesMenages/ARACHIDE/raisonCulture_7,speculationCulturesMenages/ARACHIDE/raisonCulture7_autre,speculationCulturesMenages/ARACHIDE/sourceSemence_7,speculationCulturesMenages/ARACHIDE/tempsRecolte_7,speculationCulturesMenages/ARACHIDE/comeneSaison2019_7,speculationCulturesMenages/ARACHIDE/dureeRecolte_7,speculationCulturesMenages/ARACHIDE/AST_Arachide,speculationCulturesMenages/ARACHIDE/quantiteStock_7,speculationCulturesMenages/ARACHIDE/contrainteCulture_7,speculationCulturesMenages/SOJA/raisonCulture_8,speculationCulturesMenages/SOJA/raisonCulture8_autre,speculationCulturesMenages/SOJA/sourceSemence_8,speculationCulturesMenages/SOJA/tempsRecolte_8,speculationCulturesMenages/SOJA/comeneSaison2019_8,speculationCulturesMenages/SOJA/dureeRecolte_8,speculationCulturesMenages/SOJA/AST_Soja,speculationCulturesMenages/SOJA/quantiteStock_8,speculationCulturesMenages/SOJA/contrainteCulture_8,speculationCulturesMenages/ANGOLE/raisonCulture_9,speculationCulturesMenages/ANGOLE/raisonCulture9_autre,speculationCulturesMenages/ANGOLE/sourceSemence_9,speculationCulturesMenages/ANGOLE/tempsRecolte_9,speculationCulturesMenages/ANGOLE/comeneSaison2019_9,speculationCulturesMenages/ANGOLE/dureeRecolte_9,speculationCulturesMenages/ANGOLE/AST_POIS_ANGOLE,speculationCulturesMenages/ANGOLE/quantiteStock_9,speculationCulturesMenages/ANGOLE/contrainteCulture_9,speculationCulturesMenages/PATATE_DOUCE/raisonCulture_10,speculationCulturesMenages/PATATE_DOUCE/raisonCulture10_autre,speculationCulturesMenages/PATATE_DOUCE/sourceSemence_10,speculationCulturesMenages/PATATE_DOUCE/tempsRecolte_10,speculationCulturesMenages/PATATE_DOUCE/comeneSaison2019_10,speculationCulturesMenages/PATATE_DOUCE/dureeRecolte_10,speculationCulturesMenages/PATATE_DOUCE/AST_PATATE_DOUCE,speculationCulturesMenages/PATATE_DOUCE/quantiteStock_10,speculationCulturesMenages/PATATE_DOUCE/contrainteCulture_10,speculationCulturesMenages/POMME_DE_TERRE/raisonCulture_11,speculationCulturesMenages/POMME_DE_TERRE/raisonCulture11_autre,speculationCulturesMenages/POMME_DE_TERRE/sourceSemence_11,speculationCulturesMenages/POMME_DE_TERRE/tempsRecolte_11,speculationCulturesMenages/POMME_DE_TERRE/comeneSaison2019_11,speculationCulturesMenages/POMME_DE_TERRE/dureeRecolte_11,speculationCulturesMenages/POMME_DE_TERRE/AST_POMME_TERRE,speculationCulturesMenages/POMME_DE_TERRE/quantiteStock_11,speculationCulturesMenages/POMME_DE_TERRE/contrainteCulture_11,speculationCulturesMenages/TAROT/raisonCulture_12,speculationCulturesMenages/TAROT/raisonCulture12_autre,speculationCulturesMenages/TAROT/sourceSemence_12,speculationCulturesMenages/TAROT/tempsRecolte_12,speculationCulturesMenages/TAROT/comeneSaison2019_12,speculationCulturesMenages/TAROT/dureeRecolte_12,speculationCulturesMenages/TAROT/AST_TARO,speculationCulturesMenages/TAROT/quantiteStock_12,speculationCulturesMenages/TAROT/contrainteCulture_12,speculationCulturesMenages/MANIOC/raisonCulture_13,speculationCulturesMenages/MANIOC/raisonCulture13_autre,speculationCulturesMenages/MANIOC/sourceSemence_13,speculationCulturesMenages/MANIOC/tempsRecolte_13,speculationCulturesMenages/MANIOC/comeneSaison2019_13,speculationCulturesMenages/MANIOC/dureeRecolte_13,speculationCulturesMenages/MANIOC/AST_MANIOC,speculationCulturesMenages/MANIOC/quantiteStock_13,speculationCulturesMenages/MANIOC/contrainteCulture_13,speculationCulturesMenages/BANANE_PLANTAIN/raisonCulture_14,speculationCulturesMenages/BANANE_PLANTAIN/raisonCulture14_autre,speculationCulturesMenages/BANANE_PLANTAIN/sourceSemence_14,speculationCulturesMenages/BANANE_PLANTAIN/tempsRecolte_14,speculationCulturesMenages/BANANE_PLANTAIN/comeneSaison2019_14,speculationCulturesMenages/BANANE_PLANTAIN/dureeRecolte_14,speculationCulturesMenages/BANANE_PLANTAIN/AST_BANANE_PLANTAIN,speculationCulturesMenages/BANANE_PLANTAIN/quantiteStock_14,speculationCulturesMenages/BANANE_PLANTAIN/contrainteCulture_14,speculationCulturesMenages/IGNAME/raisonCulture_15,speculationCulturesMenages/IGNAME/raisonCulture15_autre,speculationCulturesMenages/IGNAME/sourceSemence_15,speculationCulturesMenages/IGNAME/tempsRecolte_15,speculationCulturesMenages/IGNAME/comeneSaison2019_15,speculationCulturesMenages/IGNAME/dureeRecolte_15,speculationCulturesMenages/IGNAME/AST_IGNAME,speculationCulturesMenages/IGNAME/quantiteStock_15,speculationCulturesMenages/IGNAME/contrainteCulture_15,speculationCulturesMenages/CULTURES_MARAICHERES/raisonCulture_16,speculationCulturesMenages/CULTURES_MARAICHERES/raisonCulture16_autre,speculationCulturesMenages/CULTURES_MARAICHERES/sourceSemence_16,speculationCulturesMenages/CULTURES_MARAICHERES/tempsRecolte_16,speculationCulturesMenages/CULTURES_MARAICHERES/comeneSaison2019_16,speculationCulturesMenages/CULTURES_MARAICHERES/dureeRecolte_16,speculationCulturesMenages/CULTURES_MARAICHERES/AST_CULTURES_MARAICHERES,speculationCulturesMenages/CULTURES_MARAICHERES/quantiteStock_16,speculationCulturesMenages/CULTURES_MARAICHERES/contrainteCulture_16,speculationCulturesMenages/PALMIER_A_HUILE/raisonCulture_17,speculationCulturesMenages/PALMIER_A_HUILE/raisonCulture17_autre,speculationCulturesMenages/PALMIER_A_HUILE/sourceSemence_17,speculationCulturesMenages/PALMIER_A_HUILE/tempsRecolte_17,speculationCulturesMenages/PALMIER_A_HUILE/comeneSaison2019_17,speculationCulturesMenages/PALMIER_A_HUILE/dureeRecolte_17,speculationCulturesMenages/PALMIER_A_HUILE/AST_PALMIER_A_HUILE,speculationCulturesMenages/PALMIER_A_HUILE/quantiteStock_17,speculationCulturesMenages/PALMIER_A_HUILE/contrainteCulture_17,speculationCulturesMenages/CAFE_VERT/raisonCulture_18,speculationCulturesMenages/CAFE_VERT/raisonCulture18_autre,speculationCulturesMenages/CAFE_VERT/sourceSemence_18,speculationCulturesMenages/CAFE_VERT/tempsRecolte_18,speculationCulturesMenages/CAFE_VERT/comeneSaison2019_18,speculationCulturesMenages/CAFE_VERT/dureeRecolte_18,speculationCulturesMenages/CAFE_VERT/AST_CAFE,speculationCulturesMenages/CAFE_VERT/quantiteStock_18,speculationCulturesMenages/CAFE_VERT/contrainteCulture_18,speculationCulturesMenages/FRUITS/raisonCulture_20,speculationCulturesMenages/FRUITS/raisonCulture20_autre,speculationCulturesMenages/FRUITS/sourceSemence_20,speculationCulturesMenages/FRUITS/tempsRecolte_20,speculationCulturesMenages/FRUITS/comeneSaison2019_20,speculationCulturesMenages/FRUITS/dureeRecolte_20,speculationCulturesMenages/FRUITS/AST_FRUITS,speculationCulturesMenages/FRUITS/quantiteStock_20,speculationCulturesMenages/FRUITS/contrainteCulture_20,speculationCulturesMenages/MIEL/raisonCulture_21,speculationCulturesMenages/MIEL/raisonCulture21_autre,speculationCulturesMenages/MIEL/sourceSemence_21,speculationCulturesMenages/MIEL/tempsRecolte_21,speculationCulturesMenages/MIEL/comeneSaison2019_21,speculationCulturesMenages/MIEL/dureeRecolte_21,speculationCulturesMenages/MIEL/AST_MIEL,speculationCulturesMenages/MIEL/quantiteStock_21,speculationCulturesMenages/MIEL/contrainteCulture_21,Animal_possession_module/betail,Animal_possession_module/AC19,Animal_possession_module/especes/betailElevage/1,Animal_possession_module/especes/betailElevage/2,Animal_possession_module/especes/betailElevage/3,Animal_possession_module/especes/betailElevage/4,Animal_possession_module/especes/betailElevage/5,Animal_possession_module/especes/betailElevage/6,Animal_possession_module/especes/BOVINS/nbrBetail_1,Animal_possession_module/especes/BOVINS/perteBetails_1,Animal_possession_module/especes/BOVINS/causePerte_1/1,Animal_possession_module/especes/BOVINS/causePerte_1/2,Animal_possession_module/especes/BOVINS/causePerte_1/3,Animal_possession_module/especes/BOVINS/perteSaisonier_1,Animal_possession_module/especes/PORCINS/nbrBetail_2,Animal_possession_module/especes/PORCINS/perteBetails_2,Animal_possession_module/especes/PORCINS/causePerte_2/1,Animal_possession_module/especes/PORCINS/causePerte_2/2,Animal_possession_module/especes/PORCINS/causePerte_2/3,Animal_possession_module/especes/PORCINS/perteSaisonier_2,Animal_possession_module/especes/OVINS/nbrBetail_3,Animal_possession_module/especes/OVINS/perteBetails_3,Animal_possession_module/especes/OVINS/causePerte_3/1,Animal_possession_module/especes/OVINS/causePerte_3/2,Animal_possession_module/especes/OVINS/causePerte_3/3,Animal_possession_module/especes/OVINS/perteSaisonier_3,Animal_possession_module/especes/CAPRINS/nbrBetail_4,Animal_possession_module/especes/CAPRINS/perteBetails_4,Animal_possession_module/especes/CAPRINS/causePerte_4/1,Animal_possession_module/especes/CAPRINS/causePerte_4/2,Animal_possession_module/especes/CAPRINS/causePerte_4/3,Animal_possession_module/especes/CAPRINS/perteSaisonier_4,Animal_possession_module/especes/VOLAILLES/nbrBetail_5,Animal_possession_module/especes/VOLAILLES/perteBetails_5,Animal_possession_module/especes/VOLAILLES/causePerte_5/1,Animal_possession_module/especes/VOLAILLES/causePerte_5/2,Animal_possession_module/especes/VOLAILLES/causePerte_5/3,Animal_possession_module/especes/VOLAILLES/perteSaisonier_5,Animal_possession_module/especes/LAPINS_COBAILLES/nbrBetail_6,Animal_possession_module/especes/LAPINS_COBAILLES/perteBetails_6,Animal_possession_module/especes/LAPINS_COBAILLES/causePerte_6/1,Animal_possession_module/especes/LAPINS_COBAILLES/causePerte_6/2,Animal_possession_module/especes/LAPINS_COBAILLES/causePerte_6/3,Animal_possession_module/especes/LAPINS_COBAILLES/perteSaisonier_6,Safety_module/SafetyBasic_submodule/MDDIHHPercSafe,Safety_module/SafetyBasic_submodule/MDDIHHUnsafeWhy,Safety_module/SafetyBasic_submodule/MDDIHHUnsafeWhy_oth,Safety_module/SafetyBasic_submodule/MDDIHHShInsec1Y,Safety_module/SafetyBasic_submodule/MDDIHHShInsecType,Safety_module/SafetyBasic_submodule/MDDIHHShInsecType_oth,commentaire,today,_id,_uuid,_submission_time,_date_modified,_tags,_notes,_version,_duration,_submitted_by,_total_media,_media_count,_media_all_received,_xform_id";
             var csvData = @"2023-10-26T16:47:09.173+01:00,26/10/2023,1,5,502,50202,50202009,5.02E+11,ZD 009,XXX,1,1,XXX,2,5,9,1,34,1,1,1,n/a,1,38,1,100,n/a,n/a,200,5,0,1,1,0,1,0,1,0,0,0,1,0,2,5,1,0,100,n/a,1,1,1,1,1,1,1,8,0,8,0,2,7,0,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,0,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,0,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,0,n/a,0,0,15,3,0,8,3,n/a,0,n/a,n/a,n/a,n/a,1,6,15,999,XXX,102,n/a,119,n/a,100,n/a,800,n/a,2,False,False,False,True,False,False,False,False,0,10104,n/a,2,n/a,200,100,n/a,105,401,582,n/a,582,582,True,True,True,True,True,True,True,True,True,True,True,True,2,n/a,582,582,582,n/a,True,True,True,True,True,True,True,True,True,True,True,True,0,n/a,n/a,n/a,5,500,1,1,1,500,1,0,n/a,n/a,3,500,1,1,0,n/a,0,n/a,0,n/a,1,500,0,1,0,0,n/a,n/a,n/a,2,500,0,0,n/a,n/a,2,500,1,2,2,2,2,2,2,2,2,1,2,1,2,1,2,10,30,30,30,30,9999,9999,9999,30,9999,10,9999,2,0,2,2,7,1,2000,0,n/a,0,n/a,1,2600,0,n/a,0,n/a,1,1800,0,n/a,0,n/a,1,1300,0,n/a,0,n/a,1,250,0,n/a,0,n/a,0,n/a,0,n/a,0,n/a,1,3500,0,n/a,0,n/a,0,n/a,0,n/a,0,n/a,1,500,0,n/a,0,n/a,0,n/a,0,n/a,0,n/a,0,n/a,0,n/a,0,n/a,0,n/a,0,n/a,0,n/a,1,700,0,n/a,0,n/a,0,n/a,0,n/a,0,n/a,0,n/a,0,n/a,0,n/a,1,3000,0,n/a,0,n/a,0,n/a,0,n/a,0,n/a,0,n/a,0,n/a,1,2500,0,n/a,1,700,0,n/a,1,1000,0,n/a,0,n/a,0,n/a,0,n/a,0,n/a,0,n/a,0,n/a,0,n/a,0,n/a,1,22000,0,n/a,0,n/a,0,n/a,1,8500,0,n/a,0,n/a,0,n/a,1,85000,0,n/a,0,n/a,0,n/a,1,44000,0,n/a,1,16,n/a,8000,8000,7,1,1,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,0,0,0,n/a,n/a,False,False,False,False,False,False,False,True,True,False,False,n/a,0,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,0,n/a,n/a,n/a,n/a,n/a,1,11800,4,n/a,5,11800,0,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,1,1,1,1,0,1,1,0,1,1,1,1,0,1,0,0,1,0,1,1,2,7,1,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,True,False,XXX,1,19,XXX,False,False,True,False,1,3,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,0,n/a,0,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,0,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,2,1,2,2,0,0,0,0,1,1,0,1,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,XXX,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,0,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,n/a,0,1,n/a,1,1,n/a,XXX,26/10/2023,43323921,1ce78e48-c603-4e65-8507-68c058998567,2023-10-26T17:21:04,2023-10-26T17:21:04,,,2310251214,5541,XXX,0,0,True,61451";
 
             string csvFilePath = @"C:\Users\nraj39\Downloads\sample_file_1_row.csv";
@@ -2406,18 +2452,19 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
         static string IncrementFileName(string filePath, ref int counter)
         {
             return Path.GetDirectoryName(filePath)
-                 + Path.DirectorySeparatorChar
-                 + Path.GetFileNameWithoutExtension(filePath)
-                 + counter++.ToString()
-                 + Path.GetExtension(filePath);
+                   + Path.DirectorySeparatorChar
+                   + Path.GetFileNameWithoutExtension(filePath)
+                   + counter++.ToString()
+                   + Path.GetExtension(filePath);
         }
+
         static string GetFileName(string filePath, long counter)
         {
             return Path.GetDirectoryName(filePath)
-                 + Path.DirectorySeparatorChar
-                 + Path.GetFileNameWithoutExtension(filePath)
-                 + counter.ToString()
-                 + Path.GetExtension(filePath);
+                   + Path.DirectorySeparatorChar
+                   + Path.GetFileNameWithoutExtension(filePath)
+                   + counter.ToString()
+                   + Path.GetExtension(filePath);
         }
 
         private static void ConcatFiles(string[] inputFilePaths, string outputFilePath)
@@ -2434,6 +2481,7 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
                 }
             }
         }
+
         private static void DeleteFiles(string[] inputFilePaths)
         {
             foreach (var inputFilePath in inputFilePaths)
@@ -2472,8 +2520,8 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
 1,""70,105,114,115,116""
 2,""83,101,99,111,110,100""";
             using (var w = new ChoParquetWriter(filePath)
-                .UseNestedKeyFormat(false)
-                )
+                       .UseNestedKeyFormat(false)
+                  )
             {
                 w.Write(dt);
             }
@@ -2483,6 +2531,7 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
             actual.Print();
             Assert.AreEqual(expected, actual);
         }
+
         [Test]
         public static void BlobDataTable2Parquet()
         {
@@ -2494,7 +2543,7 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
 1,""70,105,114,115,116""
 2,""83,101,99,111,110,100""";
             using (var w = new ChoParquetWriter(filePath)
-                )
+                  )
             {
                 w.Write(dt);
             }
@@ -2504,6 +2553,7 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
             actual.Print();
             Assert.AreEqual(expected, actual);
         }
+
         [Test]
         public static void BlobDataTable2ParquetUsingAllowFlattenArrayOfType()
         {
@@ -2524,7 +2574,7 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
             };
 
             using (var w = new ChoParquetWriter(filePath)
-                )
+                  )
             {
                 w.Write(dt);
             }
@@ -2559,20 +2609,20 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
             string filePath = "GenParquetFileWithNullableValueTypeDataTable.parquet";
 
             string expected = @"Id,MgrId,Salary,JoinedDate
-1,100,100000.1,6/10/2023
-2,200,200000.1,6/9/2023
+1,100,100000.1,2023-06-10
+2,200,200000.1,2023-06-09
 ,,,";
 
 
             using (var w = new ChoParquetWriter(filePath)
-                .Configure(c => c.MapParquetType = t =>
-                {
-                    if (t.IsValueType)
-                        return ChoType.GetNullableType(t);
-                    else
-                        return t;
-                })
-                )
+                       .Configure(c => c.MapParquetType = t =>
+                       {
+                           if (t.IsValueType)
+                               return ChoType.GetNullableType(t);
+                           else
+                               return t;
+                       })
+                  )
             {
                 w.Write(dt);
             }
@@ -2601,15 +2651,12 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
             stopwatch.Start();
 
             using (var r = new ChoCSVReader(csvFilePath)
-                    .Configure(c => c.LiteParsing = true)
-                    .CustomMemberValueOverride
-                    ((r, fn, fv, fc, c) =>
-                    {
-
-                    })
-                //.Configure(c => c.NestedKeySeparator = '/')
-                //.Configure(c => c.ConvertToNestedObject = true)
-                .WithFirstLineHeader())
+                       .Configure(c => c.LiteParsing = true)
+                       .CustomMemberValueOverride
+                           ((r, fn, fv, fc, c) => { })
+                       //.Configure(c => c.NestedKeySeparator = '/')
+                       //.Configure(c => c.ConvertToNestedObject = true)
+                       .WithFirstLineHeader())
             {
                 //using (var w = new ChoJSONWriter(jsonFilePath)
                 //    //.UseJsonSerialization()
@@ -2638,8 +2685,8 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
                     outFilePath.Print();
 
                     using (var w = new ChoJSONWriter(outFilePath)
-                        .UseJsonSerialization(true)
-                        )
+                               .UseJsonSerialization(true)
+                          )
                     {
                         w.Write(data.Select(rec => rec.ConvertToNestedObject()));
                     }
@@ -2696,7 +2743,6 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
 
         protected void Dispose(bool finalize)
         {
-
         }
 
         public void Init(string csvHeaderLine)
@@ -2711,23 +2757,21 @@ CGO9650,Comercial Tecnipak Ltda,7/11/2016,""$80,000"",56531508-89c0-4ecf-afaf-cd
                 _rwPairs.Add(new KeyValuePair<ChoCSVReader<dynamic>, ChoJSONWriter<dynamic>>(r, w));
             }
 
-            Task.Run(() =>
-            {
-
-            });
+            Task.Run(() => { });
         }
 
         public void Push(string csvDataLine)
         {
             _blocks.Add(csvDataLine);
         }
+
         private string GetFileName(string filePath, long counter)
         {
             return Path.GetDirectoryName(filePath)
-                 + Path.DirectorySeparatorChar
-                 + Path.GetFileNameWithoutExtension(filePath)
-                 + counter.ToString()
-                 + Path.GetExtension(filePath);
+                   + Path.DirectorySeparatorChar
+                   + Path.GetFileNameWithoutExtension(filePath)
+                   + counter.ToString()
+                   + Path.GetExtension(filePath);
         }
 
         ~ParallelCSVToJsonGenerator()
